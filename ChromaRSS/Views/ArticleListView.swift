@@ -56,7 +56,7 @@ struct ArticleListView: View {
             case .starred: a.isStarred
             }
         }
-        .filter { search.isEmpty || $0.title.localizedCaseInsensitiveContains(search) || ($0.summary ?? "").localizedCaseInsensitiveContains(search) }
+        .filter { search.isEmpty || $0.title.localizedStandardContains(search) || ($0.summary ?? "").localizedStandardContains(search) }
     }
 
     var body: some View {
@@ -89,7 +89,10 @@ struct ArticleListView: View {
                         ForEach(Filter.allCases) { Text($0.rawValue).tag($0) }
                     }
                     Button { for a in articles { a.isRead = true } } label: { Label("Mark All as Read", systemImage: "checkmark.circle") }
-                } label: { Image(systemName: "line.3.horizontal.decrease.circle") }
+                } label: {
+                    Label("Filter Articles", systemImage: "line.3.horizontal.decrease.circle")
+                        .labelStyle(.iconOnly)
+                }
             }
         }
         .chromaBrowserPresentation(item: $browserTarget) { ExtensionBrowserView(target: $0) }
@@ -125,7 +128,10 @@ struct ArticleRow: View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 6) {
-                    if !article.isRead { Circle().fill(.blue).frame(width: 8, height: 8) }
+                    if !article.isRead {
+                        Circle().fill(.blue).frame(width: 8, height: 8)
+                            .accessibilityHidden(true)
+                    }
                     Text(article.title)
                         .font(.headline.weight(article.isRead ? .regular : .semibold))
                         .foregroundStyle(article.isRead ? .secondary : .primary)
@@ -137,7 +143,10 @@ struct ArticleRow: View {
                 HStack(spacing: 6) {
                     if let name = article.feed?.title { Text(name).lineLimit(1) }
                     if let date = article.publishedAt { Text("·"); Text(date, style: .relative) }
-                    if article.isStarred { Image(systemName: "star.fill").foregroundStyle(.yellow) }
+                    if article.isStarred {
+                        Image(systemName: "star.fill").foregroundStyle(.yellow)
+                            .accessibilityHidden(true)
+                    }
                 }
                 .font(.caption).foregroundStyle(.tertiary)
             }
@@ -157,4 +166,11 @@ struct ArticleRow: View {
         guard let s = article.summary ?? article.contentHTML else { return nil }
         return HTMLTextExtractor.plainText(from: s, maxLength: 200)
     }
+}
+
+#Preview {
+    NavigationStack {
+        ArticleListView(scope: .all, title: "All Articles")
+    }
+    .chromaPreviewEnvironment()
 }

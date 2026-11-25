@@ -44,26 +44,33 @@ struct ExtensionBrowserView: View {
 
     private func topBar(_ session: BrowserSession, _ tab: BrowserTabAdapter?) -> some View {
         HStack(spacing: 14) {
-            Button { dismiss() } label: { Image(systemName: "xmark").font(.body.weight(.semibold)) }
+            Button("Close Browser", systemImage: "xmark") { dismiss() }
+                .labelStyle(.iconOnly)
+                .font(.body.weight(.semibold))
             VStack(alignment: .leading, spacing: 1) {
                 Text((tab?.title.isEmpty ?? true) ? target.title : (tab?.title ?? ""))
                     .font(.subheadline.weight(.semibold)).lineLimit(1)
                 HStack(spacing: 4) {
-                    Image(systemName: tab?.url?.scheme == "https" ? "lock.fill" : "lock.open").font(.caption2)
+                    Image(systemName: tab?.url?.scheme == "https" ? "lock.fill" : "lock.open")
+                        .font(.caption2)
+                        .accessibilityHidden(true)
                     Text(tab?.url?.host ?? target.url.host ?? "").font(.caption).lineLimit(1)
                 }
                 .foregroundStyle(.secondary)
             }
             Spacer(minLength: 0)
-            Button { tab?.stopOrReload() } label: {
-                Image(systemName: (tab?.isLoading ?? false) ? "xmark.circle" : "arrow.clockwise")
+            Button((tab?.isLoading ?? false) ? "Stop Loading" : "Reload Page",
+                   systemImage: (tab?.isLoading ?? false) ? "xmark.circle" : "arrow.clockwise") {
+                tab?.stopOrReload()
             }
+            .labelStyle(.iconOnly)
             Button { showTabs = true } label: {
                 Text("\(session.tabs.count)")
                     .font(.caption.bold())
                     .frame(width: 24, height: 24)
                     .overlay(RoundedRectangle(cornerRadius: 6).stroke(lineWidth: 1.5))
             }
+            .accessibilityLabel("Open Tabs, \(session.tabs.count)")
         }
         .padding(.horizontal)
         .padding(.vertical, 10)
@@ -74,9 +81,11 @@ struct ExtensionBrowserView: View {
     private func bottomBar(_ session: BrowserSession, _ tab: BrowserTabAdapter?) -> some View {
         let _ = manager.revision
         return HStack(spacing: 16) {
-            Button { tab?.goBack() } label: { Image(systemName: "chevron.left") }
+            Button("Back", systemImage: "chevron.left") { tab?.goBack() }
+                .labelStyle(.iconOnly)
                 .disabled(!(tab?.canGoBack ?? false))
-            Button { tab?.goForward() } label: { Image(systemName: "chevron.right") }
+            Button("Forward", systemImage: "chevron.right") { tab?.goForward() }
+                .labelStyle(.iconOnly)
                 .disabled(!(tab?.canGoForward ?? false))
             Divider().frame(height: 24)
             ScrollView(.horizontal, showsIndicators: false) {
@@ -89,7 +98,10 @@ struct ExtensionBrowserView: View {
                 .padding(.horizontal, 4)
             }
             if let article = target.article {
-                Button { article.isStarred.toggle() } label: { Image(systemName: article.isStarred ? "star.fill" : "star") }
+                Button(article.isStarred ? "Remove Star" : "Star Article", systemImage: article.isStarred ? "star.fill" : "star") {
+                    article.isStarred.toggle()
+                }
+                .labelStyle(.iconOnly)
             }
             Menu {
                 if let url = tab?.url ?? Optional(target.url) {
@@ -105,7 +117,10 @@ struct ExtensionBrowserView: View {
                 if target.article != nil {
                     Button { showSummary = true } label: { Label("Article Summary", systemImage: "text.alignleft") }
                 }
-            } label: { Image(systemName: "ellipsis.circle") }
+            } label: {
+                Label("Browser Actions", systemImage: "ellipsis.circle")
+                    .labelStyle(.iconOnly)
+            }
         }
         .font(.title3)
         .padding(.horizontal)
@@ -132,6 +147,7 @@ struct ExtensionBrowserView: View {
                 }
             }
         }
+        .accessibilityLabel(badge.isEmpty ? record.name : "\(record.name), \(badge)")
         .contextMenu {
             Text(record.name)
             Button { manager.openOptions(for: record.id) } label: { Label("Extension Options", systemImage: "slider.horizontal.3") }

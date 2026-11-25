@@ -39,7 +39,10 @@ struct ArticleReaderView: View {
         .chromaInlineTitle()
         .toolbar {
             ToolbarItemGroup(placement: .chromaTrailing) {
-                Button { article.isStarred.toggle() } label: { Image(systemName: article.isStarred ? "star.fill" : "star") }
+                Button(article.isStarred ? "Remove Star" : "Star Article", systemImage: article.isStarred ? "star.fill" : "star") {
+                    article.isStarred.toggle()
+                }
+                .labelStyle(.iconOnly)
                 if let url = URL(string: article.link) { ShareLink(item: url) }
             }
         }
@@ -51,4 +54,12 @@ struct ArticleReaderView: View {
         let text = HTMLTextExtractor.plainText(from: html, maxLength: 0, preserveParagraphs: true)
         return text.isEmpty ? "No preview is available for this article. Open it in the browser to read it." : text
     }
+}
+
+#Preview {
+    let container = PreviewSampleData.makeContainer()
+    NavigationStack {
+        ArticleReaderView(article: PreviewSampleData.sampleArticle(in: container))
+    }
+    .chromaPreviewEnvironment(container: container)
 }

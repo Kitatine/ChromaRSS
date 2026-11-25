@@ -51,8 +51,12 @@ struct FeedsListView: View {
                             exporting = true
                         } label: { Label("Export OPML…", systemImage: "square.and.arrow.up") }
                         .disabled(feeds.isEmpty)
-                    } label: { Image(systemName: "ellipsis.circle") }
-                    Button { showAdd = true } label: { Image(systemName: "plus") }
+                    } label: {
+                        Label("Feed Options", systemImage: "ellipsis.circle")
+                            .labelStyle(.iconOnly)
+                    }
+                    Button("Add Feed", systemImage: "plus") { showAdd = true }
+                        .labelStyle(.iconOnly)
                 }
             }
             .sheet(isPresented: $showAdd) { AddFeedSheet() }
@@ -139,4 +143,9 @@ struct FeedsListView: View {
             message = error.localizedDescription
         }
     }
+}
+
+#Preview {
+    FeedsListView()
+        .chromaPreviewEnvironment()
 }

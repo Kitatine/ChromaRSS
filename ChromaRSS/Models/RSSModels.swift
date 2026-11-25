@@ -31,6 +31,8 @@ final class Feed {
 
 @Model
 final class Article {
+    #Index<Article>([\.feedURL, \.sortDate], [\.sortDate], [\.isRead], [\.isStarred])
+
     @Attribute(.unique) var uniqueKey: String
     var feedURL: String
     var guid: String

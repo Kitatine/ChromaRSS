@@ -68,3 +68,8 @@ struct InstallExtensionSheet: View {
         }
     }
 }
+
+#Preview {
+    InstallExtensionSheet()
+        .chromaPreviewEnvironment()
+}

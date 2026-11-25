@@ -21,7 +21,7 @@ final class BrowserWindowAdapter: NSObject, WKWebExtensionWindow {
     }
     #if os(macOS)
     func screenFrame(for context: WKWebExtensionContext) -> CGRect {
-        NSScreen.main?.frame ?? CGRect(x: 0, y: 0, width: 1440, height: 900)
+        session?.activeTab?.webView.window?.screen?.frame ?? NSScreen.main?.frame ?? CGRect(x: 0, y: 0, width: 1440, height: 900)
     }
     #endif
     func focus(for context: WKWebExtensionContext, completionHandler: @escaping ((any Error)?) -> Void) { completionHandler(nil) }

@@ -31,7 +31,8 @@ struct ExtensionManagerView: View {
             .navigationTitle("Extensions")
             .toolbar {
                 ToolbarItem(placement: .chromaTrailing) {
-                    Button { showInstall = true } label: { Image(systemName: "plus") }
+                    Button("Install Extension", systemImage: "plus") { showInstall = true }
+                        .labelStyle(.iconOnly)
                 }
             }
             .sheet(isPresented: $showInstall) { InstallExtensionSheet() }
@@ -70,7 +71,7 @@ struct ExtensionRow: View {
                     .font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
-                Toggle("", isOn: Binding(
+                Toggle("Enable \(record.name)", isOn: Binding(
                     get: { record.isEnabled },
                     set: { value in Task { await manager.setEnabled(value, for: record.id) } }))
                     .labelsHidden()
@@ -82,10 +83,10 @@ struct ExtensionRow: View {
                 Button { manager.openOptions(for: record.id) } label: { Label("Options", systemImage: "slider.horizontal.3") }
                     .buttonStyle(.bordered).controlSize(.small)
             }
-            let problems = (ctx?.errors.map(\.localizedDescription) ?? []) + [manager.loadErrors[record.id]].compactMap { $0 }
+            let problems = Array(Set((ctx?.errors.map(\.localizedDescription) ?? []) + [manager.loadErrors[record.id]].compactMap { $0 })).sorted()
             if !problems.isEmpty {
                 DisclosureGroup("Diagnostics (\(problems.count))") {
-                    ForEach(Array(problems.enumerated()), id: \.offset) { _, text in
+                    ForEach(problems, id: \.self) { text in
                         Text(text).font(.caption).foregroundStyle(.orange)
                     }
                 }
@@ -94,4 +95,9 @@ struct ExtensionRow: View {
         }
         .padding(.vertical, 4)
     }
+}
+
+#Preview {
+    ExtensionManagerView()
+        .chromaPreviewEnvironment()
 }
