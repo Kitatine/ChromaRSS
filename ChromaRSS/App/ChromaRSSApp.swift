@@ -36,7 +36,7 @@ struct ChromaRSSApp: App {
                     ScreenshotHarnessView(outputDir: outputDir)
                 } else {
                     RootTabView()
-                        .frame(minWidth: 420, minHeight: 740)
+                        .frame(minWidth: 960, minHeight: 680)
                         .task { await extensionManager.bootstrap() }
                 }
                 #else
@@ -47,6 +47,8 @@ struct ChromaRSSApp: App {
             .environment(settings)
             .environment(extensionManager)
             .environment(syncService)
+            .environment(\.chromaTheme, settings.readerTheme)
+            .environment(\.chromaHeadlineDesign, settings.headlineDesign)
         }
         .modelContainer(container)
     }

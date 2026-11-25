@@ -16,23 +16,30 @@
 		43D04873DCB3509483B0A5E5 /* PreviewSampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 792E0642B78B8196F80225AA; };
 		59F8E5537E83B78CD96C5B01 /* ScreenshotShowcase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2EE962E92768694032DD976; };
 		630079499D908838C6A12464 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FCB8953AE57039F8C975994A; };
+		6317BC7FA03B93BB15890FEF /* AppearanceMenuButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03AF2D835188CB06174FCC8A; };
 		73E9D9227C08339959E54FB0 /* ExtensionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EACC149DC3B735E2C4020BF; };
+		74CBC95269C3554F03915C67 /* OPMLDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8DD5EEDD6FD620D617E9093; };
 		76A97C9EC8798F38B0896329 /* AddFeedSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B08783C436E7BD93EB43ADCA; };
 		7A3F72C627B41588F8B95653 /* bilingual-helper in Resources */ = {isa = PBXBuildFile; fileRef = 705F8C3E293DC9D278301066; };
+		80C6CEA8FE426F7E5231E7D8 /* ArticleCardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B095697C12B9115739653D1; };
 		9007D23B27040EBC679B5855 /* InstallExtensionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B63469A81C47F6D273D67518; };
 		94BB4547780D46F497158753 /* RSSModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BC2C296F37CC51024E9CD3D; };
 		983D2FD2A820CA37175F892C /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C76470B65ED5BFE60B57BDF5; };
+		A04420D0D32C928FA94B10C5 /* InoreaderWorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABF7E6709FFD2C08A115567B; };
 		A15F732F997E07E6E66A9D9A /* FeedsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF19146707DC8C81A87BBDA; };
 		A9CD0DF6441E280620B24B8E /* PlatformCompat.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCA7856D452D3F4540039D96; };
 		ABA8CE919BBF667955AB196C /* ExtensionManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AECBAAB6AB2936E0DFF89C9F; };
 		ABBEA67B96EC390A8B1F7A2D /* ArticleReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCAB9A2C3E186F050412B71; };
+		AF63F5A14519AA2C09B6FB8D /* FeedAvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8E60F2E4E914625E588E051; };
 		C6E1CB469360CD1E6224CBF0 /* WebViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE7CC55F16F51EBA43C3E59A; };
 		DD4994E580EC37F29CE2B2B7 /* ExtensionOptionsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3680E948B1A67ECF5C72603; };
 		E051C2165561F26FE434B997 /* ArticleListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94DA2C8877DE13C9481652FE; };
 		E2170DA7940F7E5C341A7690 /* FeedSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C01A442853FA9933C6D94BD; };
+		E6845AED0B0D2F1B4C703326 /* DesignTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF654D1192B9A91CD126579F; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		03AF2D835188CB06174FCC8A /* AppearanceMenuButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppearanceMenuButton.swift"; sourceTree = "<group>"; };
 		37A2D07D928BC5B946E119F3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		504DD9DB1181B322B64553E9 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppSettings.swift"; sourceTree = "<group>"; };
 		67D0F66B75F93FFAAB8640B9 /* BrowserSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrowserSession.swift"; sourceTree = "<group>"; };
@@ -43,20 +50,25 @@
 		7C01A442853FA9933C6D94BD /* FeedSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedSyncService.swift"; sourceTree = "<group>"; };
 		7EF19146707DC8C81A87BBDA /* FeedsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedsListView.swift"; sourceTree = "<group>"; };
 		7FDB4D727A45C59DA1CDA0C0 /* ChromaRSSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChromaRSSApp.swift"; sourceTree = "<group>"; };
+		8B095697C12B9115739653D1 /* ArticleCardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArticleCardViews.swift"; sourceTree = "<group>"; };
 		94DA2C8877DE13C9481652FE /* ArticleListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArticleListView.swift"; sourceTree = "<group>"; };
 		9B6C00F877111216236EB6BB /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView.swift"; sourceTree = "<group>"; };
 		9BC2C296F37CC51024E9CD3D /* RSSModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RSSModels.swift"; sourceTree = "<group>"; };
+		ABF7E6709FFD2C08A115567B /* InoreaderWorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InoreaderWorkspaceView.swift"; sourceTree = "<group>"; };
 		AECBAAB6AB2936E0DFF89C9F /* ExtensionManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExtensionManagerView.swift"; sourceTree = "<group>"; };
 		B08783C436E7BD93EB43ADCA /* AddFeedSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddFeedSheet.swift"; sourceTree = "<group>"; };
 		B0CE91EA64AB9A511507F4AF /* ExtensionBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExtensionBrowserView.swift"; sourceTree = "<group>"; };
 		B63469A81C47F6D273D67518 /* InstallExtensionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InstallExtensionSheet.swift"; sourceTree = "<group>"; };
 		C76470B65ED5BFE60B57BDF5 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RootTabView.swift"; sourceTree = "<group>"; };
 		CCA7856D452D3F4540039D96 /* PlatformCompat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlatformCompat.swift"; sourceTree = "<group>"; };
+		D8DD5EEDD6FD620D617E9093 /* OPMLDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "OPMLDocument.swift"; sourceTree = "<group>"; };
 		E3680E948B1A67ECF5C72603 /* ExtensionOptionsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExtensionOptionsSheet.swift"; sourceTree = "<group>"; };
 		F2EE962E92768694032DD976 /* ScreenshotShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ScreenshotShowcase.swift"; sourceTree = "<group>"; };
+		F8E60F2E4E914625E588E051 /* FeedAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedAvatarView.swift"; sourceTree = "<group>"; };
 		FBCAB9A2C3E186F050412B71 /* ArticleReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArticleReaderView.swift"; sourceTree = "<group>"; };
 		FCB8953AE57039F8C975994A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FE7CC55F16F51EBA43C3E59A /* WebViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebViewContainer.swift"; sourceTree = "<group>"; };
+		FF654D1192B9A91CD126579F /* DesignTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DesignTokens.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,12 +77,14 @@
 
 /* Begin PBXGroup section */
 		1BADDC1D73C1A20F347483E1 /* Products */ = {isa = PBXGroup; children = (71CCD365E3A654DA84DBA191); name = Products; sourceTree = "<group>"; };
-		38DF21AEF4612506D6BE5CBE /* Views */ = {isa = PBXGroup; children = (B08783C436E7BD93EB43ADCA, 94DA2C8877DE13C9481652FE, FBCAB9A2C3E186F050412B71, B0CE91EA64AB9A511507F4AF, AECBAAB6AB2936E0DFF89C9F, E3680E948B1A67ECF5C72603, 7EF19146707DC8C81A87BBDA, B63469A81C47F6D273D67518, 9B6C00F877111216236EB6BB, FE7CC55F16F51EBA43C3E59A); path = "Views"; sourceTree = "<group>"; };
+		38DF21AEF4612506D6BE5CBE /* Views */ = {isa = PBXGroup; children = (B08783C436E7BD93EB43ADCA, 94DA2C8877DE13C9481652FE, FBCAB9A2C3E186F050412B71, 950A2D373B2809B658DC7F2E, B0CE91EA64AB9A511507F4AF, AECBAAB6AB2936E0DFF89C9F, E3680E948B1A67ECF5C72603, 7EF19146707DC8C81A87BBDA, ABF7E6709FFD2C08A115567B, B63469A81C47F6D273D67518, 9B6C00F877111216236EB6BB, FE7CC55F16F51EBA43C3E59A); path = "Views"; sourceTree = "<group>"; };
+		5FDB91368D7DDA2418B6CB65 /* Design */ = {isa = PBXGroup; children = (FF654D1192B9A91CD126579F); path = "Design"; sourceTree = "<group>"; };
 		609874F33224C0C09F1FEE42 /* Services */ = {isa = PBXGroup; children = (67D0F66B75F93FFAAB8640B9, 6EACC149DC3B735E2C4020BF, 7C01A442853FA9933C6D94BD, CCA7856D452D3F4540039D96); path = "Services"; sourceTree = "<group>"; };
 		8D3FC6DB5D0827F168A73277 /* mainGroup */ = {isa = PBXGroup; children = (CE882751F8B3EE4485706ED4, 1BADDC1D73C1A20F347483E1); sourceTree = "<group>"; };
-		A1C86A29E589D48EC70B6A32 /* Models */ = {isa = PBXGroup; children = (504DD9DB1181B322B64553E9, 792E0642B78B8196F80225AA, 9BC2C296F37CC51024E9CD3D); path = "Models"; sourceTree = "<group>"; };
+		950A2D373B2809B658DC7F2E /* Components */ = {isa = PBXGroup; children = (03AF2D835188CB06174FCC8A, 8B095697C12B9115739653D1, F8E60F2E4E914625E588E051); path = "Components"; sourceTree = "<group>"; };
+		A1C86A29E589D48EC70B6A32 /* Models */ = {isa = PBXGroup; children = (504DD9DB1181B322B64553E9, D8DD5EEDD6FD620D617E9093, 792E0642B78B8196F80225AA, 9BC2C296F37CC51024E9CD3D); path = "Models"; sourceTree = "<group>"; };
 		A65C972D6504CCBD48E70712 /* BundledExtensions */ = {isa = PBXGroup; children = (705F8C3E293DC9D278301066); path = BundledExtensions; sourceTree = "<group>"; };
-		CE882751F8B3EE4485706ED4 /* ChromaRSS */ = {isa = PBXGroup; children = (D1D0524B025E57AFFF263442, A1C86A29E589D48EC70B6A32, 609874F33224C0C09F1FEE42, 38DF21AEF4612506D6BE5CBE, A65C972D6504CCBD48E70712, FCB8953AE57039F8C975994A, 37A2D07D928BC5B946E119F3); path = ChromaRSS; sourceTree = "<group>"; };
+		CE882751F8B3EE4485706ED4 /* ChromaRSS */ = {isa = PBXGroup; children = (D1D0524B025E57AFFF263442, 5FDB91368D7DDA2418B6CB65, A1C86A29E589D48EC70B6A32, 609874F33224C0C09F1FEE42, 38DF21AEF4612506D6BE5CBE, A65C972D6504CCBD48E70712, FCB8953AE57039F8C975994A, 37A2D07D928BC5B946E119F3); path = ChromaRSS; sourceTree = "<group>"; };
 		D1D0524B025E57AFFF263442 /* App */ = {isa = PBXGroup; children = (7FDB4D727A45C59DA1CDA0C0, C76470B65ED5BFE60B57BDF5, F2EE962E92768694032DD976); path = "App"; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
@@ -112,7 +126,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		F680599402C0D80E245DE801 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (2ABB956413183C8330C7CBC6, 983D2FD2A820CA37175F892C, 59F8E5537E83B78CD96C5B01, 07F4991D371F4C063D4AEC39, 43D04873DCB3509483B0A5E5, 94BB4547780D46F497158753, 340FD873A291DDCBCC0627D6, 73E9D9227C08339959E54FB0, E2170DA7940F7E5C341A7690, A9CD0DF6441E280620B24B8E, 76A97C9EC8798F38B0896329, E051C2165561F26FE434B997, ABBEA67B96EC390A8B1F7A2D, 0597DD22B5CDDD81AAD6BFFD, ABA8CE919BBF667955AB196C, DD4994E580EC37F29CE2B2B7, A15F732F997E07E6E66A9D9A, 9007D23B27040EBC679B5855, 0366047E1EAD5CC5EA2D8838, C6E1CB469360CD1E6224CBF0); runOnlyForDeploymentPostprocessing = 0; };
+		F680599402C0D80E245DE801 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (2ABB956413183C8330C7CBC6, 983D2FD2A820CA37175F892C, 59F8E5537E83B78CD96C5B01, E6845AED0B0D2F1B4C703326, 07F4991D371F4C063D4AEC39, 74CBC95269C3554F03915C67, 43D04873DCB3509483B0A5E5, 94BB4547780D46F497158753, 340FD873A291DDCBCC0627D6, 73E9D9227C08339959E54FB0, E2170DA7940F7E5C341A7690, A9CD0DF6441E280620B24B8E, 76A97C9EC8798F38B0896329, E051C2165561F26FE434B997, ABBEA67B96EC390A8B1F7A2D, 6317BC7FA03B93BB15890FEF, 80C6CEA8FE426F7E5231E7D8, AF63F5A14519AA2C09B6FB8D, 0597DD22B5CDDD81AAD6BFFD, ABA8CE919BBF667955AB196C, DD4994E580EC37F29CE2B2B7, A15F732F997E07E6E66A9D9A, A04420D0D32C928FA94B10C5, 9007D23B27040EBC679B5855, 0366047E1EAD5CC5EA2D8838, C6E1CB469360CD1E6224CBF0); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */

@@ -2,7 +2,9 @@
 
 A native **iOS 18.4+ & macOS 15.4+** RSS/Atom/JSON Feed subscriber with a built-in **`WKWebView` + `WKWebExtensionController`** in-app browser — so you can install and run real Chrome extensions (`.crx` / `.zip` Manifest V2 & V3, including **Immersive Translate**) directly on every article without leaving the app.
 
-![ChromaRSS Showcase](docs/screenshots/showcase.png)
+![ChromaRSS Mobile Showcase](docs/screenshots/showcase.png)
+
+![ChromaRSS Inoreader 3-Column Workspace](docs/screenshots/05-inoreader-workspace.png)
 
 ## Why ChromaRSS?
 
@@ -66,6 +68,6 @@ python3 scripts/generate_xcodeproj.py
 
 ## Screenshots
 
-| Feeds & Unread | Extension Browser (`文A` Active) | Extension Manager |
-| :---: | :---: | :---: |
-| ![Feeds](docs/screenshots/01-feeds.png) | ![Extension Browser](docs/screenshots/02-extension-browser.png) | ![Extensions](docs/screenshots/03-extension-manager.png) |
+| Library Bento | Magazine Stream | Extension Browser (`文A` Active) | Chrome Plugin Studio |
+| :---: | :---: | :---: | :---: |
+| ![Library](docs/screenshots/04-library-bento.png) | ![Feeds](docs/screenshots/01-feeds.png) | ![Extension Browser](docs/screenshots/02-extension-browser.png) | ![Extensions](docs/screenshots/03-extension-manager.png) |

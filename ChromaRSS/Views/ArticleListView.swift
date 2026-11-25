@@ -11,33 +11,35 @@ struct BrowserTarget: Identifiable {
 
 struct ArticleListView: View {
     enum Scope: Hashable {
-        case all, unread, starred
+        case all, unread, starred, today
+        case folder(String)
         case feed(String)
-    }
-    enum Filter: String, CaseIterable, Identifiable {
-        case all = "All", unread = "Unread", starred = "Starred"
-        var id: String { rawValue }
     }
 
     let scope: Scope
     let title: String
+    var selectedArticle: Binding<Article?>? = nil
+    var showEmptyStarterButton: Bool = false
 
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.chromaTheme) private var theme
     @Environment(FeedSyncService.self) private var sync
     @Environment(AppSettings.self) private var settings
     @Query private var articles: [Article]
 
     @State private var search = ""
-    @State private var filter: Filter = .all
+    @State private var filter: StreamFilter = .all
     @State private var browserTarget: BrowserTarget?
     @State private var readerArticle: Article?
 
-    init(scope: Scope, title: String) {
+    init(scope: Scope, title: String, selectedArticle: Binding<Article?>? = nil, showEmptyStarterButton: Bool = false) {
         self.scope = scope
         self.title = title
+        self.selectedArticle = selectedArticle
+        self.showEmptyStarterButton = showEmptyStarterButton
         let sort = [SortDescriptor(\Article.sortDate, order: .reverse)]
         switch scope {
-        case .all:
+        case .all, .today, .folder:
             _articles = Query(sort: sort)
         case .unread:
             _articles = Query(filter: #Predicate<Article> { !$0.isRead }, sort: sort)
@@ -48,49 +50,95 @@ struct ArticleListView: View {
         }
     }
 
+    private var scopedArticles: [Article] {
+        switch scope {
+        case .today:
+            return articles.filter { Calendar.current.isDateInToday($0.sortDate) }
+        case .folder(let name):
+            return articles.filter { ($0.feed?.folderName?.nilIfEmpty ?? "Subscriptions") == name }
+        default:
+            return articles
+        }
+    }
+
     private var visible: [Article] {
-        articles.filter { a in
+        scopedArticles.filter { article in
             switch filter {
             case .all: true
-            case .unread: !a.isRead
-            case .starred: a.isStarred
+            case .unread: !article.isRead
+            case .saved: article.isStarred
+            case .today: Calendar.current.isDateInToday(article.sortDate)
             }
         }
-        .filter { search.isEmpty || $0.title.localizedStandardContains(search) || ($0.summary ?? "").localizedStandardContains(search) }
+        .filter {
+            search.isEmpty ||
+            $0.title.localizedStandardContains(search) ||
+            ($0.summary ?? "").localizedStandardContains(search)
+        }
+    }
+
+    private var unreadCount: Int {
+        scopedArticles.filter { !$0.isRead }.count
     }
 
     var body: some View {
-        List(visible) { article in
-            Button { open(article) } label: { ArticleRow(article: article) }
-                .buttonStyle(.plain)
-                .swipeActions(edge: .leading) {
-                    Button { article.isStarred.toggle() } label: { Label("Star", systemImage: article.isStarred ? "star.slash" : "star") }
-                        .tint(.yellow)
-                }
-                .swipeActions(edge: .trailing) {
-                    Button { article.isRead.toggle() } label: {
-                        Label(article.isRead ? "Unread" : "Read", systemImage: article.isRead ? "circle" : "checkmark")
+        VStack(spacing: 0) {
+            if !scopedArticles.isEmpty {
+                FilterPillBar(selection: $filter, unreadCount: unreadCount)
+                    .background(theme.canvasColor)
+            }
+
+            ScrollView {
+                if visible.isEmpty {
+                    emptyView
+                        .padding(.top, 48)
+                } else {
+                    LazyVStack(spacing: settings.streamLayout == .compact ? ChromaSpacing.xs : ChromaSpacing.s) {
+                        ForEach(visible) { article in
+                            Button { open(article) } label: { rowView(for: article) }
+                                .buttonStyle(.plain)
+                                .contextMenu { articleActions(article) }
+                                .swipeActions(edge: .leading) {
+                                    Button { article.isStarred.toggle() } label: {
+                                        Label(article.isStarred ? "Unsave" : "Save",
+                                              systemImage: article.isStarred ? "bookmark.slash" : "bookmark")
+                                    }
+                                    .tint(ChromaPalette.starAmber)
+                                }
+                                .swipeActions(edge: .trailing) {
+                                    Button { article.isRead.toggle() } label: {
+                                        Label(article.isRead ? "Unread" : "Read",
+                                              systemImage: article.isRead ? "circle" : "checkmark")
+                                    }
+                                    .tint(ChromaPalette.unreadIndigo)
+                                }
+                        }
                     }
-                    .tint(.blue)
+                    .padding(.horizontal, ChromaSpacing.m)
+                    .padding(.vertical, ChromaSpacing.xs)
                 }
+            }
+            .background(theme.canvasColor)
         }
-        .listStyle(.plain)
-        .overlay {
-            if visible.isEmpty { ContentUnavailableView("No Articles", systemImage: "tray", description: Text("Pull down to refresh.")) }
-        }
+        .background(theme.canvasColor.ignoresSafeArea())
         .navigationTitle(title)
         .chromaInlineTitle()
-        .searchable(text: $search)
+        .searchable(text: $search, prompt: "Search articles")
         .refreshable { await refresh() }
         .toolbar {
-            ToolbarItem(placement: .chromaTrailing) {
+            ToolbarItemGroup(placement: .chromaTrailing) {
+                AppearanceMenuButton()
                 Menu {
-                    Picker("Filter", selection: $filter) {
-                        ForEach(Filter.allCases) { Text($0.rawValue).tag($0) }
+                    Button {
+                        for article in scopedArticles { article.isRead = true }
+                    } label: {
+                        Label("Mark All as Read", systemImage: "checkmark.circle")
                     }
-                    Button { for a in articles { a.isRead = true } } label: { Label("Mark All as Read", systemImage: "checkmark.circle") }
+                    Button { Task { await refresh() } } label: {
+                        Label("Refresh", systemImage: "arrow.clockwise")
+                    }
                 } label: {
-                    Label("Filter Articles", systemImage: "line.3.horizontal.decrease.circle")
+                    Label("Stream Options", systemImage: "ellipsis.circle")
                         .labelStyle(.iconOnly)
                 }
             }
@@ -99,8 +147,73 @@ struct ArticleListView: View {
         .navigationDestination(item: $readerArticle) { ArticleReaderView(article: $0) }
     }
 
+    @ViewBuilder
+    private func rowView(for article: Article) -> some View {
+        let isSelected = selectedArticle?.wrappedValue?.uniqueKey == article.uniqueKey
+        switch settings.streamLayout {
+        case .magazine:
+            MagazineArticleRow(article: article, isSelected: isSelected)
+        case .cards:
+            HeroCardArticleView(
+                article: article,
+                isSelected: isSelected,
+                onToggleRead: { article.isRead.toggle() },
+                onToggleStar: { article.isStarred.toggle() }
+            )
+        case .compact:
+            CompactArticleRow(article: article, isSelected: isSelected)
+        }
+    }
+
+    @ViewBuilder
+    private func articleActions(_ article: Article) -> some View {
+        Button {
+            article.isRead.toggle()
+        } label: {
+            Label(article.isRead ? "Mark as Unread" : "Mark as Read",
+                  systemImage: article.isRead ? "circle" : "checkmark.circle")
+        }
+        Button {
+            article.isStarred.toggle()
+        } label: {
+            Label(article.isStarred ? "Remove Bookmark" : "Save for Later",
+                  systemImage: article.isStarred ? "bookmark.slash" : "bookmark")
+        }
+        if let url = URL(string: article.link) {
+            Button {
+                browserTarget = BrowserTarget(url: url, title: article.title, article: article)
+            } label: {
+                Label("Open in Extension Browser", systemImage: "puzzlepiece.extension")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var emptyView: some View {
+        if !search.isEmpty {
+            ContentUnavailableView.search
+        } else if showEmptyStarterButton && scopedArticles.isEmpty {
+            ContentUnavailableView {
+                Label("Your Stream is Empty", systemImage: "newspaper")
+            } description: {
+                Text("Load starter feeds—including tech blogs and foreign-language sites—to start reading with Chrome extensions.")
+            } actions: {
+                Button("Add Starter Feeds") {
+                    Task { await sync.addStarterFeeds(preferExtensionBrowser: settings.defaultOpenInExtensionBrowser, in: modelContext) }
+                }
+                .buttonStyle(.borderedProminent)
+            }
+        } else {
+            ContentUnavailableView("No Matching Articles", systemImage: "tray", description: Text("Try switching filters or pulling down to refresh."))
+        }
+    }
+
     private func open(_ article: Article) {
         article.isRead = true
+        if let selectedArticle {
+            selectedArticle.wrappedValue = article
+            return
+        }
         let useExtension = article.feed?.preferExtensionBrowser ?? settings.defaultOpenInExtensionBrowser
         if useExtension, let url = URL(string: article.link) {
             browserTarget = BrowserTarget(url: url, title: article.title, article: article)
@@ -121,56 +234,9 @@ struct ArticleListView: View {
     }
 }
 
-struct ArticleRow: View {
-    let article: Article
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    if !article.isRead {
-                        Circle().fill(.blue).frame(width: 8, height: 8)
-                            .accessibilityHidden(true)
-                    }
-                    Text(article.title)
-                        .font(.headline.weight(article.isRead ? .regular : .semibold))
-                        .foregroundStyle(article.isRead ? .secondary : .primary)
-                        .lineLimit(3)
-                }
-                if let snippet = snippet, !snippet.isEmpty {
-                    Text(snippet).font(.subheadline).foregroundStyle(.secondary).lineLimit(2)
-                }
-                HStack(spacing: 6) {
-                    if let name = article.feed?.title { Text(name).lineLimit(1) }
-                    if let date = article.publishedAt { Text("·"); Text(date, style: .relative) }
-                    if article.isStarred {
-                        Image(systemName: "star.fill").foregroundStyle(.yellow)
-                            .accessibilityHidden(true)
-                    }
-                }
-                .font(.caption).foregroundStyle(.tertiary)
-            }
-            Spacer(minLength: 0)
-            if let img = article.imageURL, let url = URL(string: img) {
-                AsyncImage(url: url) { image in
-                    image.resizable().scaledToFill()
-                } placeholder: { Color.gray.opacity(0.15) }
-                .frame(width: 64, height: 64)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-            }
-        }
-        .contentShape(Rectangle())
-    }
-
-    private var snippet: String? {
-        guard let s = article.summary ?? article.contentHTML else { return nil }
-        return HTMLTextExtractor.plainText(from: s, maxLength: 200)
-    }
-}
-
 #Preview {
     NavigationStack {
-        ArticleListView(scope: .all, title: "All Articles")
+        ArticleListView(scope: .all, title: "Stream")
     }
     .chromaPreviewEnvironment()
 }

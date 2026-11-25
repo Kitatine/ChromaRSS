@@ -6,6 +6,7 @@ struct SettingsView: View {
     @Environment(AppSettings.self) private var settings
     @Environment(ExtensionManager.self) private var manager
     @Environment(FeedSyncService.self) private var sync
+    @Environment(\.chromaTheme) private var theme
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Feed.title) private var feeds: [Feed]
 
@@ -18,6 +19,23 @@ struct SettingsView: View {
         @Bindable var settings = settings
         NavigationStack {
             Form {
+                Section("Appearance & Layout") {
+                    Picker("Stream Layout", selection: $settings.streamLayout) {
+                        ForEach(StreamLayoutMode.allCases) { mode in
+                            Label(mode.title, systemImage: mode.systemImage).tag(mode)
+                        }
+                    }
+                    Picker("Headline Typography", selection: $settings.headlineDesign) {
+                        ForEach(HeadlineDesign.allCases) { design in
+                            Text(design.title).tag(design)
+                        }
+                    }
+                    Picker("Reading Theme", selection: $settings.readerTheme) {
+                        ForEach(ReaderTheme.allCases) { item in
+                            Label(item.title, systemImage: item.systemImage).tag(item)
+                        }
+                    }
+                }
                 Section {
                     Toggle("Open articles in extension browser", isOn: $settings.defaultOpenInExtensionBrowser)
                 } header: {
@@ -29,9 +47,9 @@ struct SettingsView: View {
                     Toggle("Auto-grant extension permissions", isOn: $settings.autoGrantExtensionPermissions)
                     Button("Restore Built-in Helper Extension") { Task { await manager.restoreBundledExtension() } }
                 } header: {
-                    Text("Extensions")
+                    Text("Chrome Extensions")
                 } footer: {
-                    Text("Granting access to all websites lets extensions such as translators work without prompts. Takes effect the next time an extension loads.")
+                    Text("Granting access to all websites lets translation extensions activate automatically without prompts.")
                 }
                 Section("Subscriptions") {
                     Button("Import OPML…") { importing = true }
@@ -51,6 +69,9 @@ struct SettingsView: View {
                     }
                 }
             }
+            .formStyle(.grouped)
+            .scrollContentBackground(.hidden)
+            .background(theme.canvasColor.ignoresSafeArea())
             .navigationTitle("Settings")
             .fileImporter(isPresented: $importing, allowedContentTypes: [.xml, .plainText, .data]) { result in
                 Task { await importOPML(result) }
