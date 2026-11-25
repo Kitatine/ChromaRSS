@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Bilingual Reader Helper",
+  "version": "1.0.0",
+  "description": "Built-in demo extension: floating button and tap-to-translate paragraph callouts. Proves content scripts, popups and storage work inside ChromaRSS.",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_title": "Bilingual Helper",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

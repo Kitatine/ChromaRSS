@@ -1,0 +1,30 @@
+.chroma-pill {
+  position: fixed;
+  right: 14px;
+  bottom: 90px;
+  z-index: 2147483647;
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  border: none;
+  background: rgba(30, 30, 30, 0.82);
+  color: #fff;
+  font: 600 15px -apple-system, sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.chroma-pill.chroma-on { background: #0a84ff; }
+.chroma-bilingual-on p,
+.chroma-bilingual-on li,
+.chroma-bilingual-on blockquote {
+  border-left: 3px solid rgba(10, 132, 255, 0.45);
+  padding-left: 8px;
+}
+.chroma-callout {
+  margin: 4px 0 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(10, 132, 255, 0.12);
+  font: 14px -apple-system, sans-serif;
+  color: inherit;
+}
+.chroma-callout a { color: #0a84ff; }

@@ -1,0 +1,199 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0366047E1EAD5CC5EA2D8838 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6C00F877111216236EB6BB; };
+		0597DD22B5CDDD81AAD6BFFD /* ExtensionBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0CE91EA64AB9A511507F4AF; };
+		07F4991D371F4C063D4AEC39 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504DD9DB1181B322B64553E9; };
+		2ABB956413183C8330C7CBC6 /* ChromaRSSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FDB4D727A45C59DA1CDA0C0; };
+		2B0F084BDD92BB7726033A63 /* ChromaRSSCore in Frameworks */ = {isa = PBXBuildFile; productRef = A15160EA373DFB985D8F7A6D; };
+		340FD873A291DDCBCC0627D6 /* BrowserSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67D0F66B75F93FFAAB8640B9; };
+		59F8E5537E83B78CD96C5B01 /* ScreenshotShowcase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2EE962E92768694032DD976; };
+		630079499D908838C6A12464 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FCB8953AE57039F8C975994A; };
+		73E9D9227C08339959E54FB0 /* ExtensionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EACC149DC3B735E2C4020BF; };
+		76A97C9EC8798F38B0896329 /* AddFeedSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B08783C436E7BD93EB43ADCA; };
+		7A3F72C627B41588F8B95653 /* bilingual-helper in Resources */ = {isa = PBXBuildFile; fileRef = 705F8C3E293DC9D278301066; };
+		9007D23B27040EBC679B5855 /* InstallExtensionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B63469A81C47F6D273D67518; };
+		94BB4547780D46F497158753 /* RSSModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BC2C296F37CC51024E9CD3D; };
+		983D2FD2A820CA37175F892C /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C76470B65ED5BFE60B57BDF5; };
+		A15F732F997E07E6E66A9D9A /* FeedsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EF19146707DC8C81A87BBDA; };
+		A9CD0DF6441E280620B24B8E /* PlatformCompat.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCA7856D452D3F4540039D96; };
+		ABA8CE919BBF667955AB196C /* ExtensionManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AECBAAB6AB2936E0DFF89C9F; };
+		ABBEA67B96EC390A8B1F7A2D /* ArticleReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBCAB9A2C3E186F050412B71; };
+		C6E1CB469360CD1E6224CBF0 /* WebViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE7CC55F16F51EBA43C3E59A; };
+		DD4994E580EC37F29CE2B2B7 /* ExtensionOptionsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3680E948B1A67ECF5C72603; };
+		E051C2165561F26FE434B997 /* ArticleListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94DA2C8877DE13C9481652FE; };
+		E2170DA7940F7E5C341A7690 /* FeedSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C01A442853FA9933C6D94BD; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		37A2D07D928BC5B946E119F3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		504DD9DB1181B322B64553E9 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppSettings.swift"; sourceTree = "<group>"; };
+		67D0F66B75F93FFAAB8640B9 /* BrowserSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrowserSession.swift"; sourceTree = "<group>"; };
+		6EACC149DC3B735E2C4020BF /* ExtensionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExtensionManager.swift"; sourceTree = "<group>"; };
+		705F8C3E293DC9D278301066 /* bilingual-helper */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "bilingual-helper"; sourceTree = "<group>"; };
+		71CCD365E3A654DA84DBA191 /* ChromaRSS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChromaRSS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7C01A442853FA9933C6D94BD /* FeedSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedSyncService.swift"; sourceTree = "<group>"; };
+		7EF19146707DC8C81A87BBDA /* FeedsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedsListView.swift"; sourceTree = "<group>"; };
+		7FDB4D727A45C59DA1CDA0C0 /* ChromaRSSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ChromaRSSApp.swift"; sourceTree = "<group>"; };
+		94DA2C8877DE13C9481652FE /* ArticleListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArticleListView.swift"; sourceTree = "<group>"; };
+		9B6C00F877111216236EB6BB /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView.swift"; sourceTree = "<group>"; };
+		9BC2C296F37CC51024E9CD3D /* RSSModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RSSModels.swift"; sourceTree = "<group>"; };
+		AECBAAB6AB2936E0DFF89C9F /* ExtensionManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExtensionManagerView.swift"; sourceTree = "<group>"; };
+		B08783C436E7BD93EB43ADCA /* AddFeedSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddFeedSheet.swift"; sourceTree = "<group>"; };
+		B0CE91EA64AB9A511507F4AF /* ExtensionBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExtensionBrowserView.swift"; sourceTree = "<group>"; };
+		B63469A81C47F6D273D67518 /* InstallExtensionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InstallExtensionSheet.swift"; sourceTree = "<group>"; };
+		C76470B65ED5BFE60B57BDF5 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RootTabView.swift"; sourceTree = "<group>"; };
+		CCA7856D452D3F4540039D96 /* PlatformCompat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PlatformCompat.swift"; sourceTree = "<group>"; };
+		E3680E948B1A67ECF5C72603 /* ExtensionOptionsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExtensionOptionsSheet.swift"; sourceTree = "<group>"; };
+		F2EE962E92768694032DD976 /* ScreenshotShowcase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ScreenshotShowcase.swift"; sourceTree = "<group>"; };
+		FBCAB9A2C3E186F050412B71 /* ArticleReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ArticleReaderView.swift"; sourceTree = "<group>"; };
+		FCB8953AE57039F8C975994A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		FE7CC55F16F51EBA43C3E59A /* WebViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebViewContainer.swift"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6BC9136C2E1B992EF374A2EA /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (2B0F084BDD92BB7726033A63); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1BADDC1D73C1A20F347483E1 /* Products */ = {isa = PBXGroup; children = (71CCD365E3A654DA84DBA191); name = Products; sourceTree = "<group>"; };
+		38DF21AEF4612506D6BE5CBE /* Views */ = {isa = PBXGroup; children = (B08783C436E7BD93EB43ADCA, 94DA2C8877DE13C9481652FE, FBCAB9A2C3E186F050412B71, B0CE91EA64AB9A511507F4AF, AECBAAB6AB2936E0DFF89C9F, E3680E948B1A67ECF5C72603, 7EF19146707DC8C81A87BBDA, B63469A81C47F6D273D67518, 9B6C00F877111216236EB6BB, FE7CC55F16F51EBA43C3E59A); path = "Views"; sourceTree = "<group>"; };
+		609874F33224C0C09F1FEE42 /* Services */ = {isa = PBXGroup; children = (67D0F66B75F93FFAAB8640B9, 6EACC149DC3B735E2C4020BF, 7C01A442853FA9933C6D94BD, CCA7856D452D3F4540039D96); path = "Services"; sourceTree = "<group>"; };
+		8D3FC6DB5D0827F168A73277 /* mainGroup */ = {isa = PBXGroup; children = (CE882751F8B3EE4485706ED4, 1BADDC1D73C1A20F347483E1); sourceTree = "<group>"; };
+		A1C86A29E589D48EC70B6A32 /* Models */ = {isa = PBXGroup; children = (504DD9DB1181B322B64553E9, 9BC2C296F37CC51024E9CD3D); path = "Models"; sourceTree = "<group>"; };
+		A65C972D6504CCBD48E70712 /* BundledExtensions */ = {isa = PBXGroup; children = (705F8C3E293DC9D278301066); path = BundledExtensions; sourceTree = "<group>"; };
+		CE882751F8B3EE4485706ED4 /* ChromaRSS */ = {isa = PBXGroup; children = (D1D0524B025E57AFFF263442, A1C86A29E589D48EC70B6A32, 609874F33224C0C09F1FEE42, 38DF21AEF4612506D6BE5CBE, A65C972D6504CCBD48E70712, FCB8953AE57039F8C975994A, 37A2D07D928BC5B946E119F3); path = ChromaRSS; sourceTree = "<group>"; };
+		D1D0524B025E57AFFF263442 /* App */ = {isa = PBXGroup; children = (7FDB4D727A45C59DA1CDA0C0, C76470B65ED5BFE60B57BDF5, F2EE962E92768694032DD976); path = "App"; sourceTree = "<group>"; };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		42AEFBAE01D2DFD981F7DA7D /* ChromaRSS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 039A649935568E87BEF725AD;
+			buildPhases = (F680599402C0D80E245DE801, 6BC9136C2E1B992EF374A2EA, 781C774F390DF12CD292A30B);
+			buildRules = ();
+			dependencies = ();
+			name = ChromaRSS;
+			packageProductDependencies = (A15160EA373DFB985D8F7A6D);
+			productName = ChromaRSS;
+			productReference = 71CCD365E3A654DA84DBA191;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		46F86FAA6BBF9AC94A7E4595 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {BuildIndependentTargetsInParallel = 1; LastSwiftUpdateCheck = 1630; LastUpgradeCheck = 1630;};
+			buildConfigurationList = 5BF065D48D8C23D03623AA6A;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (en, Base);
+			mainGroup = 8D3FC6DB5D0827F168A73277;
+			packageReferences = (2BCD311588779502C5D39910);
+			productRefGroup = 1BADDC1D73C1A20F347483E1;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (42AEFBAE01D2DFD981F7DA7D);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		781C774F390DF12CD292A30B /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (630079499D908838C6A12464, 7A3F72C627B41588F8B95653); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F680599402C0D80E245DE801 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (2ABB956413183C8330C7CBC6, 983D2FD2A820CA37175F892C, 59F8E5537E83B78CD96C5B01, 07F4991D371F4C063D4AEC39, 94BB4547780D46F497158753, 340FD873A291DDCBCC0627D6, 73E9D9227C08339959E54FB0, E2170DA7940F7E5C341A7690, A9CD0DF6441E280620B24B8E, 76A97C9EC8798F38B0896329, E051C2165561F26FE434B997, ABBEA67B96EC390A8B1F7A2D, 0597DD22B5CDDD81AAD6BFFD, ABA8CE919BBF667955AB196C, DD4994E580EC37F29CE2B2B7, A15F732F997E07E6E66A9D9A, 9007D23B27040EBC679B5855, 0366047E1EAD5CC5EA2D8838, C6E1CB469360CD1E6224CBF0); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		5300D7EBF50D2A4907AFFF78 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ChromaRSS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kitawu.ChromaRSS;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			}; name = Debug; };
+		6A9C4D09739760F1345B2D45 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ChromaRSS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kitawu.ChromaRSS;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			}; name = Release; };
+		FA9139DD8B03E3F922556BF8 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				SDKROOT = auto;
+				SWIFT_VERSION = 6.0;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)");
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			}; name = Debug; };
+		FFE2104CCFAB79205AC64460 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				SDKROOT = auto;
+				SWIFT_VERSION = 6.0;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			}; name = Release; };
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		039A649935568E87BEF725AD /* Build configuration list for PBXNativeTarget "ChromaRSS" */ = {isa = XCConfigurationList; buildConfigurations = (5300D7EBF50D2A4907AFFF78, 6A9C4D09739760F1345B2D45); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		5BF065D48D8C23D03623AA6A /* Build configuration list for PBXProject "ChromaRSS" */ = {isa = XCConfigurationList; buildConfigurations = (FA9139DD8B03E3F922556BF8, FFE2104CCFAB79205AC64460); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		2BCD311588779502C5D39910 /* XCLocalSwiftPackageReference "Packages/ChromaRSSCore" */ = {isa = XCLocalSwiftPackageReference; relativePath = Packages/ChromaRSSCore; };
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A15160EA373DFB985D8F7A6D /* ChromaRSSCore */ = {isa = XCSwiftPackageProductDependency; productName = ChromaRSSCore; };
+/* End XCSwiftPackageProductDependency section */
+
+	};
+	rootObject = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+}
