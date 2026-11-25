@@ -24,12 +24,19 @@ public enum FeedDiscoveryError: Error, LocalizedError {
 }
 
 public enum FeedDiscovery {
-    public static let userAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.4 Mobile/15E148 Safari/604.1"
+    public static let userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.4 Safari/605.1.15"
+    private static let botUserAgent = "ChromaRSS/1.0 (+https://github.com/Kitatine/ChromaRSS)"
 
     public static func normalizedURL(from input: String) -> URL? {
-        var s = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        let wrapperChars = CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: "<>\"'"))
+        var s = input.trimmingCharacters(in: wrapperChars)
         guard !s.isEmpty else { return nil }
-        if s.lowercased().hasPrefix("feed://") { s = "https://" + s.dropFirst("feed://".count) }
+        let lower = s.lowercased()
+        if lower.hasPrefix("feed://") {
+            s = "https://" + s.dropFirst("feed://".count)
+        } else if lower.hasPrefix("feed:") {
+            s = String(s.dropFirst("feed:".count))
+        }
         if !s.contains("://") { s = "https://" + s }
         guard let u = URL(string: s), let host = u.host, !host.isEmpty else { return nil }
         return u
@@ -37,8 +44,16 @@ public enum FeedDiscovery {
 
     public static func extractFeedLinks(fromHTML html: String, baseURL: URL) -> [DiscoveredFeed] {
         guard let tagRegex = try? NSRegularExpression(pattern: "<link\\b[^>]*>", options: [.caseInsensitive]),
-              let attrRegex = try? NSRegularExpression(pattern: "([A-Za-z_:][-A-Za-z0-9_:.]*)\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)')") else { return [] }
-        let types: Set<String> = ["application/rss+xml", "application/atom+xml", "application/feed+json", "application/json", "text/xml", "application/xml"]
+              let attrRegex = try? NSRegularExpression(pattern: "([A-Za-z_:][-A-Za-z0-9_:.]*)\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s\"'=<>`]+))") else { return [] }
+        let types: Set<String> = [
+            "application/rss+xml",
+            "application/atom+xml",
+            "application/rdf+xml",
+            "application/feed+json",
+            "application/json",
+            "text/xml",
+            "application/xml"
+        ]
         let ns = html as NSString
         var found: [DiscoveredFeed] = []
         for m in tagRegex.matches(in: html, range: NSRange(location: 0, length: ns.length)) {
@@ -47,11 +62,22 @@ public enum FeedDiscovery {
             var attrs: [String: String] = [:]
             for a in attrRegex.matches(in: tag, range: NSRange(location: 0, length: tns.length)) {
                 let key = tns.substring(with: a.range(at: 1)).lowercased()
-                let r2 = a.range(at: 2), r3 = a.range(at: 3)
-                attrs[key] = r2.location != NSNotFound ? tns.substring(with: r2) : tns.substring(with: r3)
+                let value: String
+                if a.range(at: 2).location != NSNotFound {
+                    value = tns.substring(with: a.range(at: 2))
+                } else if a.range(at: 3).location != NSNotFound {
+                    value = tns.substring(with: a.range(at: 3))
+                } else if a.range(at: 4).location != NSNotFound {
+                    value = tns.substring(with: a.range(at: 4))
+                } else {
+                    continue
+                }
+                attrs[key] = value
             }
             guard let rel = attrs["rel"]?.lowercased(), rel.contains("alternate"),
-                  let type = attrs["type"]?.lowercased(), types.contains(type),
+                  let rawType = attrs["type"],
+                  let mimeType = rawType.lowercased().components(separatedBy: ";").first?.trimmingCharacters(in: .whitespaces),
+                  types.contains(mimeType),
                   let href = attrs["href"], !href.isEmpty,
                   let url = URL(string: HTMLTextExtractor.decodeEntities(href), relativeTo: baseURL)?.absoluteURL else { continue }
             if !found.contains(where: { $0.url == url }) {
@@ -62,15 +88,27 @@ public enum FeedDiscovery {
     }
 
     public static func fetch(url: URL, session: URLSession = .shared) async throws -> (Data, URLResponse) {
+        let retryCodes: Set<Int> = [403, 406, 429]
+        let (data, response) = try await performFetch(url: url, userAgent: userAgent, session: session)
+        if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+            if retryCodes.contains(http.statusCode) {
+                let (retryData, retryResponse) = try await performFetch(url: url, userAgent: botUserAgent, session: session)
+                if let retryHTTP = retryResponse as? HTTPURLResponse, !(200..<300).contains(retryHTTP.statusCode) {
+                    throw FeedDiscoveryError.httpStatus(retryHTTP.statusCode)
+                }
+                return (retryData, retryResponse)
+            }
+            throw FeedDiscoveryError.httpStatus(http.statusCode)
+        }
+        return (data, response)
+    }
+
+    private static func performFetch(url: URL, userAgent: String, session: URLSession) async throws -> (Data, URLResponse) {
         var req = URLRequest(url: url)
         req.timeoutInterval = 25
         req.setValue(userAgent, forHTTPHeaderField: "User-Agent")
         req.setValue("application/rss+xml, application/atom+xml, application/feed+json, application/xml, text/xml, text/html;q=0.8, */*;q=0.5", forHTTPHeaderField: "Accept")
-        let (data, response) = try await session.data(for: req)
-        if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
-            throw FeedDiscoveryError.httpStatus(http.statusCode)
-        }
-        return (data, response)
+        return try await session.data(for: req)
     }
 
     public static func fetchFeed(at url: URL, session: URLSession = .shared) async throws -> ParsedFeed {
@@ -87,17 +125,59 @@ public enum FeedDiscovery {
         }
 
         var candidates: [URL] = []
-        if let html = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) {
-            candidates += extractFeedLinks(fromHTML: html, baseURL: finalURL).map(\.url)
+        func appendCandidate(_ candidate: URL?) {
+            guard let candidate, !candidates.contains(candidate) else { return }
+            candidates.append(candidate)
         }
-        if var comps = URLComponents(url: finalURL, resolvingAgainstBaseURL: true) {
-            comps.path = ""; comps.query = nil; comps.fragment = nil
-            if let origin = comps.url {
-                for p in ["/feed", "/rss.xml", "/atom.xml", "/index.xml", "/feed.xml", "/feed.json"] {
-                    if let u = URL(string: p, relativeTo: origin)?.absoluteURL, !candidates.contains(u) { candidates.append(u) }
+
+        if let html = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) {
+            for link in extractFeedLinks(fromHTML: html, baseURL: finalURL) {
+                appendCandidate(link.url)
+            }
+        }
+
+        let host = finalURL.host?.lowercased() ?? ""
+        if host.contains("reddit.com"), !finalURL.path.hasSuffix(".rss"),
+           var comps = URLComponents(url: finalURL, resolvingAgainstBaseURL: true) {
+            let trimmed = comps.path.hasSuffix("/") ? String(comps.path.dropLast()) : comps.path
+            comps.path = trimmed + "/.rss"
+            appendCandidate(comps.url)
+        }
+
+        if host == "github.com" {
+            let parts = finalURL.path.split(separator: "/")
+            if parts.count == 2, var comps = URLComponents(url: finalURL, resolvingAgainstBaseURL: true) {
+                let repoBase = "/\(parts[0])/\(parts[1])"
+                comps.query = nil
+                comps.fragment = nil
+                for suffix in ["/releases.atom", "/commits.atom"] {
+                    comps.path = repoBase + suffix
+                    appendCandidate(comps.url)
                 }
             }
         }
+
+        if var originComps = URLComponents(url: finalURL, resolvingAgainstBaseURL: true) {
+            let rawPath = originComps.path
+            originComps.query = nil
+            originComps.fragment = nil
+            if !rawPath.isEmpty && rawPath != "/", let origin = originComps.url {
+                let trimmed = rawPath.hasSuffix("/") ? String(rawPath.dropLast()) : rawPath
+                for suffix in ["/feed", "/rss.xml", "/atom.xml", "/index.xml"] {
+                    var sub = originComps
+                    sub.path = trimmed + suffix
+                    appendCandidate(sub.url ?? URL(string: trimmed + suffix, relativeTo: origin)?.absoluteURL)
+                }
+            }
+
+            originComps.path = ""
+            if let origin = originComps.url {
+                for p in ["/feed", "/feed/", "/rss", "/rss.xml", "/atom.xml", "/index.xml", "/feed.xml", "/feed.json", "/rss/index.xml", "/feeds/posts/default"] {
+                    appendCandidate(URL(string: p, relativeTo: origin)?.absoluteURL)
+                }
+            }
+        }
+
         for c in candidates {
             if let (d, r) = try? await fetch(url: c, session: session),
                let feed = try? FeedParser.parse(data: d, baseURL: r.url ?? c) {

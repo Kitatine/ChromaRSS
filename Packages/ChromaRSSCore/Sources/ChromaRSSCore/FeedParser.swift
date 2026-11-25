@@ -19,12 +19,19 @@ public enum FeedParser {
         guard !data.isEmpty else { throw FeedParserError.emptyData }
 
         let skip: Set<UInt8> = [0x20, 0x0A, 0x0D, 0x09, 0xEF, 0xBB, 0xBF]
-        if let first = data.first(where: { !skip.contains($0) }), first == UInt8(ascii: "{") {
-            return try parseJSONFeed(data, baseURL: baseURL)
+        let trimmedData: Data
+        if let start = data.firstIndex(where: { !skip.contains($0) }) {
+            trimmedData = Data(data[start...])
+        } else {
+            throw FeedParserError.emptyData
+        }
+
+        if trimmedData.first == UInt8(ascii: "{") {
+            return try parseJSONFeed(trimmedData, baseURL: baseURL)
         }
 
         let delegate = FeedXMLDelegate(baseURL: baseURL)
-        let parser = XMLParser(data: data)
+        let parser = XMLParser(data: trimmedData)
         parser.delegate = delegate
         parser.shouldProcessNamespaces = false
         parser.shouldResolveExternalEntities = false
@@ -133,9 +140,14 @@ final class FeedXMLDelegate: NSObject, XMLParserDelegate {
 
     init(baseURL: URL?) { self.baseURL = baseURL }
 
+    private func canonicalName(_ raw: String) -> String {
+        let lower = raw.lowercased()
+        return lower.hasPrefix("atom:") ? String(lower.dropFirst(5)) : lower
+    }
+
     func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?,
                 qualifiedName qName: String?, attributes attributeDict: [String: String] = [:]) {
-        let n = elementName.lowercased()
+        let n = canonicalName(elementName)
         path.append(n)
         text = ""
         switch n {
@@ -183,7 +195,7 @@ final class FeedXMLDelegate: NSObject, XMLParserDelegate {
     }
 
     func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
-        let n = elementName.lowercased()
+        let n = canonicalName(elementName)
         let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
         let parent = path.count >= 2 ? path[path.count - 2] : ""
         defer { path.removeLast(); text = "" }

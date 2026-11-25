@@ -13,7 +13,7 @@ struct StarterFeedPreset: Identifiable, Sendable {
         .init(title: "Hacker News", url: "https://hnrss.org/frontpage", folder: "Tech"),
         .init(title: "Simon Willison's Weblog", url: "https://simonwillison.net/atom/everything/", folder: "Tech"),
         .init(title: "Ars Technica", url: "https://feeds.arstechnica.com/arstechnica/index", folder: "Tech"),
-        .init(title: "Paul Graham Essays", url: "http://www.aaronsw.com/2002/feeds/pgessays.rss", folder: "Essays"),
+        .init(title: "Daring Fireball", url: "https://daringfireball.net/feeds/main", folder: "Tech"),
         .init(title: "Zenn (日本語)", url: "https://zenn.dev/feed", folder: "Foreign Language"),
         .init(title: "DW News", url: "https://rss.dw.com/rdf/rss-en-all", folder: "Foreign Language"),
         .init(title: "Le Monde (Français)", url: "https://www.lemonde.fr/rss/une.xml", folder: "Foreign Language")
@@ -35,6 +35,9 @@ final class FeedSyncService {
         let feed: Feed
         if let existing = try fetchFeed(url: key, in: context) {
             feed = existing
+            if let newFolder = folderName?.nilIfEmpty {
+                existing.folderName = newFolder
+            }
         } else {
             feed = Feed(feedURL: key, title: parsed.title, siteURL: parsed.siteURL, feedDescription: parsed.description,
                         iconURL: parsed.iconURL, folderName: folderName?.nilIfEmpty, preferExtensionBrowser: preferExtensionBrowser)
@@ -42,6 +45,7 @@ final class FeedSyncService {
         }
         apply(parsed, to: feed, in: context)
         try context.save()
+        lastError = nil
         return feed
     }
 

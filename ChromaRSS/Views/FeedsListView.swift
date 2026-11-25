@@ -180,6 +180,20 @@ struct FeedsListView: View {
         let sortedFolders = groups.keys.sorted()
 
         return VStack(alignment: .leading, spacing: ChromaSpacing.m) {
+            HStack {
+                Text("Subscriptions")
+                    .font(.headline)
+                Spacer()
+                Button {
+                    showAdd = true
+                } label: {
+                    Label("Add Feed", systemImage: "plus.circle.fill")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(ChromaPalette.unreadIndigo)
+            }
+
             ForEach(sortedFolders, id: \.self) { folder in
                 let folderFeeds = groups[folder] ?? []
                 let folderUnread = folderFeeds.reduce(0) { $0 + $1.unreadCount }

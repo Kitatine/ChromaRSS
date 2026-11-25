@@ -27,7 +27,7 @@ struct InstallExtensionSheet: View {
                     Button { importing = true } label: { Label("Import .zip / .crx from Files…", systemImage: "folder") }
                 }
                 Section {
-                    TextField("Chrome Web Store URL, extension ID or .crx/.zip URL", text: $input, axis: .vertical)
+                    TextField("Extension Source", text: $input, prompt: Text("Chrome Web Store URL, extension ID or .crx/.zip URL"), axis: .vertical)
                         .chromaURLField()
                     Button("Install") { run { try await manager.installFromRemoteInput(input) } }
                         .disabled(input.trimmingCharacters(in: .whitespaces).isEmpty)
@@ -40,6 +40,7 @@ struct InstallExtensionSheet: View {
                 if let errorText { Section { Text(errorText).foregroundStyle(.red).font(.footnote) } }
                 if let successText { Section { Label(successText, systemImage: "checkmark.circle.fill").foregroundStyle(.green) } }
             }
+            .formStyle(.grouped)
             .disabled(isWorking)
             .navigationTitle("Install Extension")
             .chromaInlineTitle()
@@ -51,6 +52,9 @@ struct InstallExtensionSheet: View {
                 }
             }
         }
+        #if os(macOS)
+        .frame(minWidth: 480, idealWidth: 520, minHeight: 480)
+        #endif
     }
 
     private func run(_ operation: @escaping () async throws -> InstalledExtensionRecord) {

@@ -64,18 +64,17 @@ enum PreviewSampleData {
 }
 
 private struct PreviewEnvironmentModifier: ViewModifier {
-    let container: ModelContainer
-    let settings: AppSettings
-    let manager: ExtensionManager
-    let sync: FeedSyncService
+    @State private var container: ModelContainer
+    @State private var settings: AppSettings
+    @State private var manager: ExtensionManager
+    @State private var sync = FeedSyncService()
 
     @MainActor
-    init(container: ModelContainer = PreviewSampleData.makeContainer()) {
-        self.container = container
+    init(initialContainer: ModelContainer? = nil) {
         let s = AppSettings()
-        self.settings = s
-        self.manager = ExtensionManager(settings: s)
-        self.sync = FeedSyncService()
+        _container = State(initialValue: initialContainer ?? PreviewSampleData.makeContainer())
+        _settings = State(initialValue: s)
+        _manager = State(initialValue: ExtensionManager(settings: s))
     }
 
     func body(content: Content) -> some View {
@@ -90,6 +89,6 @@ private struct PreviewEnvironmentModifier: ViewModifier {
 extension View {
     @MainActor
     func chromaPreviewEnvironment(container: ModelContainer? = nil) -> some View {
-        modifier(PreviewEnvironmentModifier(container: container ?? PreviewSampleData.makeContainer()))
+        modifier(PreviewEnvironmentModifier(initialContainer: container))
     }
 }

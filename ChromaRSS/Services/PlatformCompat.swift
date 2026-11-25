@@ -25,6 +25,15 @@ enum PlatformSupport {
         Image(nsImage: image)
         #endif
     }
+
+    @MainActor
+    static func clipboardString() -> String? {
+        #if os(iOS)
+        UIPasteboard.general.string
+        #elseif os(macOS)
+        NSPasteboard.general.string(forType: .string)
+        #endif
+    }
 }
 
 extension ToolbarItemPlacement {

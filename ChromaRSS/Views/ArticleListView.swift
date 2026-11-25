@@ -31,6 +31,7 @@ struct ArticleListView: View {
     @State private var filter: StreamFilter = .all
     @State private var browserTarget: BrowserTarget?
     @State private var readerArticle: Article?
+    @State private var showAddFeed = false
 
     init(scope: Scope, title: String, selectedArticle: Binding<Article?>? = nil, showEmptyStarterButton: Bool = false) {
         self.scope = scope
@@ -88,6 +89,29 @@ struct ArticleListView: View {
                     .background(theme.canvasColor)
             }
 
+            if let err = sync.lastError {
+                HStack(spacing: ChromaSpacing.xs) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(ChromaPalette.coral)
+                    Text(err)
+                        .font(.caption)
+                        .foregroundStyle(.primary)
+                        .lineLimit(2)
+                    Spacer(minLength: 0)
+                    Button {
+                        sync.lastError = nil
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Dismiss Error")
+                }
+                .padding(.horizontal, ChromaSpacing.m)
+                .padding(.vertical, ChromaSpacing.xs)
+                .background(ChromaPalette.coral.opacity(0.12))
+            }
+
             ScrollView {
                 if visible.isEmpty {
                     emptyView
@@ -127,8 +151,14 @@ struct ArticleListView: View {
         .refreshable { await refresh() }
         .toolbar {
             ToolbarItemGroup(placement: .chromaTrailing) {
+                Button("Add Feed", systemImage: "plus") { showAddFeed = true }
+                    .labelStyle(.iconOnly)
                 AppearanceMenuButton()
                 Menu {
+                    Button { showAddFeed = true } label: {
+                        Label("Subscribe to Feed…", systemImage: "plus.circle")
+                    }
+                    Divider()
                     Button {
                         for article in scopedArticles { article.isRead = true }
                     } label: {
@@ -143,6 +173,7 @@ struct ArticleListView: View {
                 }
             }
         }
+        .sheet(isPresented: $showAddFeed) { AddFeedSheet() }
         .chromaBrowserPresentation(item: $browserTarget) { ExtensionBrowserView(target: $0) }
         .navigationDestination(item: $readerArticle) { ArticleReaderView(article: $0) }
     }
@@ -198,10 +229,17 @@ struct ArticleListView: View {
             } description: {
                 Text("Load starter feeds—including tech blogs and foreign-language sites—to start reading with Chrome extensions.")
             } actions: {
-                Button("Add Starter Feeds") {
-                    Task { await sync.addStarterFeeds(preferExtensionBrowser: settings.defaultOpenInExtensionBrowser, in: modelContext) }
+                VStack(spacing: ChromaSpacing.xs) {
+                    Button("Subscribe to URL…") {
+                        showAddFeed = true
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    Button("Add Starter Feeds") {
+                        Task { await sync.addStarterFeeds(preferExtensionBrowser: settings.defaultOpenInExtensionBrowser, in: modelContext) }
+                    }
+                    .buttonStyle(.bordered)
                 }
-                .buttonStyle(.borderedProminent)
             }
         } else {
             ContentUnavailableView("No Matching Articles", systemImage: "tray", description: Text("Try switching filters or pulling down to refresh."))

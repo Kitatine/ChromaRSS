@@ -127,17 +127,50 @@ final class DiscoveryAndOPMLTests: XCTestCase {
         <link rel="stylesheet" href="/a.css">
         <link rel="alternate" type="application/rss+xml" title="Blog &amp; News" href="/feed.xml">
         <link href='https://other.example/atom' type='application/atom+xml' rel='alternate'>
+        <link rel=alternate type=application/rss+xml href=/rss.xml>
+        <link rel="alternate" type="application/atom+xml; charset=utf-8" href="/utf8.atom">
         </head></html>
         """
         let links = FeedDiscovery.extractFeedLinks(fromHTML: html, baseURL: URL(string: "https://example.com/blog/")!)
-        XCTAssertEqual(links.map(\.url.absoluteString), ["https://example.com/feed.xml", "https://other.example/atom"])
+        XCTAssertEqual(
+            links.map(\.url.absoluteString),
+            ["https://example.com/feed.xml", "https://other.example/atom", "https://example.com/rss.xml", "https://example.com/utf8.atom"]
+        )
         XCTAssertEqual(links.first?.title, "Blog & News")
     }
 
     func testNormalizeURL() {
         XCTAssertEqual(FeedDiscovery.normalizedURL(from: "example.com/rss")?.absoluteString, "https://example.com/rss")
         XCTAssertEqual(FeedDiscovery.normalizedURL(from: "feed://example.com/rss")?.absoluteString, "https://example.com/rss")
+        XCTAssertEqual(FeedDiscovery.normalizedURL(from: "feed:https://example.com/feed.xml")?.absoluteString, "https://example.com/feed.xml")
+        XCTAssertEqual(FeedDiscovery.normalizedURL(from: "<https://example.com/rss>")?.absoluteString, "https://example.com/rss")
         XCTAssertNil(FeedDiscovery.normalizedURL(from: "   "))
+    }
+
+    func testParseLeadingWhitespaceBOMAndAtomPrefix() throws {
+        let bom = Data([0xEF, 0xBB, 0xBF])
+        let xml = """
+
+          <?xml version="1.0" encoding="utf-8"?>
+        <atom:feed xmlns:atom="http://www.w3.org/2005/Atom">
+          <atom:title>Prefixed Atom</atom:title>
+          <atom:link rel="alternate" href="https://atom.example/"/>
+          <atom:entry>
+            <atom:id>entry-1</atom:id>
+            <atom:title>Hello Atom</atom:title>
+            <atom:link rel="alternate" href="https://atom.example/1"/>
+            <atom:updated>2025-06-11T12:00:00Z</atom:updated>
+          </atom:entry>
+        </atom:feed>
+        """
+        let feed = try FeedParser.parse(data: bom + Data(xml.utf8))
+        XCTAssertEqual(feed.format, .atom)
+        XCTAssertEqual(feed.title, "Prefixed Atom")
+        XCTAssertEqual(feed.siteURL, "https://atom.example/")
+        XCTAssertEqual(feed.articles.count, 1)
+        XCTAssertEqual(feed.articles.first?.guid, "entry-1")
+        XCTAssertEqual(feed.articles.first?.title, "Hello Atom")
+        XCTAssertEqual(feed.articles.first?.link, "https://atom.example/1")
     }
 
     func testOPMLRoundTrip() throws {

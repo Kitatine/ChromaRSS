@@ -27,6 +27,7 @@ struct InoreaderWorkspaceView: View {
     @State private var selection: WorkspaceSidebarItem? = .unread
     @State private var selectedArticle: Article?
     @State private var showAddFeed = false
+    @State private var collapsedFolders: Set<String> = []
 
     var body: some View {
         @Bindable var m = manager
@@ -39,7 +40,16 @@ struct InoreaderWorkspaceView: View {
         } detail: {
             detailColumn
         }
-        .sheet(isPresented: $showAddFeed) { AddFeedSheet() }
+        .sheet(isPresented: $showAddFeed) {
+            AddFeedSheet { feed in
+                let folder = feed.folderName?.nilIfEmpty ?? "Subscriptions"
+                collapsedFolders.remove(folder)
+                selection = .feed(feed.feedURL)
+                if selectedArticle == nil {
+                    selectedArticle = feed.articles.sorted(by: { $0.sortDate > $1.sortDate }).first
+                }
+            }
+        }
         .sheet(item: $m.optionsRequest) { request in
             ExtensionOptionsSheet(extensionContext: request.context)
         }
@@ -68,12 +78,18 @@ struct InoreaderWorkspaceView: View {
                     .tag(WorkspaceSidebarItem.saved)
             }
 
-            if !feeds.isEmpty {
-                Section("Feeds") {
+            Section {
+                if feeds.isEmpty {
+                    Button {
+                        showAddFeed = true
+                    } label: {
+                        Label("Subscribe to a Feed…", systemImage: "plus.circle")
+                    }
+                } else {
                     ForEach(groups.keys.sorted(), id: \.self) { folder in
                         let folderFeeds = groups[folder] ?? []
                         let folderUnread = folderFeeds.reduce(0) { $0 + $1.unreadCount }
-                        DisclosureGroup {
+                        DisclosureGroup(isExpanded: folderExpandedBinding(for: folder)) {
                             ForEach(folderFeeds) { feed in
                                 HStack(spacing: ChromaSpacing.xs) {
                                     FeedAvatarView(title: feed.title, siteURL: feed.siteURL, feedURL: feed.feedURL, iconURL: feed.iconURL, size: 20)
@@ -101,6 +117,19 @@ struct InoreaderWorkspaceView: View {
                         .tag(WorkspaceSidebarItem.folder(folder))
                     }
                 }
+            } header: {
+                HStack {
+                    Text("Feeds")
+                    Spacer()
+                    Button {
+                        showAddFeed = true
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundStyle(ChromaPalette.unreadIndigo)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Add Feed")
+                }
             }
 
             Section("Workspace") {
@@ -123,10 +152,37 @@ struct InoreaderWorkspaceView: View {
                     .labelStyle(.iconOnly)
             }
         }
+        .safeAreaInset(edge: .bottom) {
+            VStack(spacing: 0) {
+                Divider()
+                Button {
+                    showAddFeed = true
+                } label: {
+                    Label("Subscribe to Feed", systemImage: "plus.circle.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .keyboardShortcut("n", modifiers: .command)
+                .padding(ChromaSpacing.s)
+            }
+            .background(.bar)
+        }
         .onChange(of: selection) { _, newValue in
             if case .extensions = newValue { selectedArticle = nil }
             if case .settings = newValue { selectedArticle = nil }
         }
+    }
+
+    private func folderExpandedBinding(for folder: String) -> Binding<Bool> {
+        Binding(
+            get: { !collapsedFolders.contains(folder) },
+            set: { expanded in
+                if expanded { collapsedFolders.remove(folder) }
+                else { collapsedFolders.insert(folder) }
+            }
+        )
     }
 
     private func sidebarBadgeRow(title: String, systemImage: String, tint: Color, count: Int) -> some View {
@@ -197,10 +253,17 @@ struct InoreaderWorkspaceView: View {
                 Text("Articles open inside the embedded Chrome-Extension Browser (\(manager.enabledRecords.count) plugin active) so tools like Immersive Translate work directly inline.")
             } actions: {
                 if feeds.isEmpty {
-                    Button("Add Starter Feeds") {
-                        Task { await sync.addStarterFeeds(preferExtensionBrowser: settings.defaultOpenInExtensionBrowser, in: modelContext) }
+                    HStack(spacing: ChromaSpacing.s) {
+                        Button("Subscribe to Feed") {
+                            showAddFeed = true
+                        }
+                        .buttonStyle(.borderedProminent)
+
+                        Button("Load Starter Feeds") {
+                            Task { await sync.addStarterFeeds(preferExtensionBrowser: settings.defaultOpenInExtensionBrowser, in: modelContext) }
+                        }
+                        .buttonStyle(.bordered)
                     }
-                    .buttonStyle(.borderedProminent)
                 }
             }
             .background(theme.canvasColor)
