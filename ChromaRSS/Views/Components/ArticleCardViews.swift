@@ -83,6 +83,7 @@ struct MagazineArticleRow: View {
                               lineWidth: isSelected ? 1.5 : 1)
         )
         .shadow(color: Color.black.opacity(theme == .dark ? 0.22 : 0.04), radius: 6, y: 2)
+        .contentShape(Rectangle())
     }
 
     private var cardBackground: Color {
@@ -98,6 +99,7 @@ struct MagazineArticleRow: View {
 struct HeroCardArticleView: View {
     let article: Article
     var isSelected: Bool = false
+    var onOpen: (() -> Void)? = nil
     let onToggleRead: () -> Void
     let onToggleStar: () -> Void
 
@@ -106,47 +108,60 @@ struct HeroCardArticleView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            heroBanner
-            VStack(alignment: .leading, spacing: ChromaSpacing.xs) {
-                ArticleSourceLine(article: article)
+            Button {
+                onOpen?()
+            } label: {
+                VStack(alignment: .leading, spacing: 0) {
+                    heroBanner
+                    VStack(alignment: .leading, spacing: ChromaSpacing.xs) {
+                        ArticleSourceLine(article: article)
 
-                Text(article.title)
-                    .font(.title3.bold())
-                    .fontDesign(headlineDesign.fontDesign)
-                    .foregroundStyle(article.isRead ? .secondary : .primary)
-                    .lineLimit(3)
-                    .multilineTextAlignment(.leading)
+                        Text(article.title)
+                            .font(.title3.bold())
+                            .fontDesign(headlineDesign.fontDesign)
+                            .foregroundStyle(article.isRead ? .secondary : .primary)
+                            .lineLimit(3)
+                            .multilineTextAlignment(.leading)
 
-                if let excerpt = articleExcerpt, !excerpt.isEmpty {
-                    Text(excerpt)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(3)
-                        .multilineTextAlignment(.leading)
+                        if let excerpt = articleExcerpt, !excerpt.isEmpty {
+                            Text(excerpt)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(3)
+                                .multilineTextAlignment(.leading)
+                        }
+                    }
+                    .padding([.top, .horizontal], ChromaSpacing.m)
+                    .padding(.bottom, ChromaSpacing.xs)
                 }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
 
-                Divider()
-                    .padding(.top, ChromaSpacing.xxs)
+            Divider()
+                .padding(.horizontal, ChromaSpacing.m)
 
-                HStack(spacing: ChromaSpacing.m) {
-                    Button(article.isStarred ? "Saved" : "Save",
-                           systemImage: article.isStarred ? "bookmark.fill" : "bookmark",
-                           action: onToggleStar)
-                        .foregroundStyle(article.isStarred ? ChromaPalette.starAmber : .secondary)
-                    Button(article.isRead ? "Mark Unread" : "Mark Read",
-                           systemImage: article.isRead ? "circle" : "checkmark.circle",
-                           action: onToggleRead)
-                        .foregroundStyle(.secondary)
-                    Spacer()
+            HStack(spacing: ChromaSpacing.m) {
+                Button(article.isStarred ? "Saved" : "Save",
+                       systemImage: article.isStarred ? "bookmark.fill" : "bookmark",
+                       action: onToggleStar)
+                    .foregroundStyle(article.isStarred ? ChromaPalette.starAmber : .secondary)
+                Button(article.isRead ? "Mark Unread" : "Mark Read",
+                       systemImage: article.isRead ? "circle" : "checkmark.circle",
+                       action: onToggleRead)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button {
+                    onOpen?()
+                } label: {
                     Label("Open + Plugins", systemImage: "puzzlepiece.extension")
-                        .font(.caption.weight(.semibold))
                         .foregroundStyle(ChromaPalette.unreadIndigo)
                 }
-                .font(.caption.weight(.medium))
-                .buttonStyle(.plain)
-                .padding(.top, ChromaSpacing.xxs)
             }
-            .padding(ChromaSpacing.m)
+            .font(.caption.weight(.medium))
+            .buttonStyle(.borderless)
+            .padding(.horizontal, ChromaSpacing.m)
+            .padding(.vertical, ChromaSpacing.s)
         }
         .background(isSelected ? ChromaPalette.unreadIndigo.opacity(0.08) : theme.surfaceColor,
                     in: RoundedRectangle(cornerRadius: ChromaRadius.xl))
@@ -156,6 +171,7 @@ struct HeroCardArticleView: View {
                               lineWidth: isSelected ? 1.5 : 1)
         )
         .shadow(color: Color.black.opacity(theme == .dark ? 0.28 : 0.055), radius: 10, y: 4)
+        .contentShape(Rectangle())
     }
 
     @ViewBuilder
@@ -246,6 +262,7 @@ struct CompactArticleRow: View {
             RoundedRectangle(cornerRadius: ChromaRadius.m)
                 .strokeBorder(isSelected ? ChromaPalette.unreadIndigo.opacity(0.6) : theme.borderColor, lineWidth: 1)
         )
+        .contentShape(Rectangle())
     }
 }
 

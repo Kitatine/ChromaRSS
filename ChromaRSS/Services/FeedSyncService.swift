@@ -80,22 +80,50 @@ final class FeedSyncService {
         guard !feeds.isEmpty else { return }
         isRefreshing = true
         defer { isRefreshing = false }
+        let feedByURL = Dictionary(uniqueKeysWithValues: feeds.map { ($0.feedURL, $0) })
         let urls = feeds.map(\.feedURL)
-        let results = await withTaskGroup(of: (String, ParsedFeed?).self) { group -> [(String, ParsedFeed?)] in
+        var failures = 0
+        await withTaskGroup(of: (String, ParsedFeed?).self) { group in
             for u in urls {
                 group.addTask { (u, try? await Self.fetch(u)) }
             }
-            var out: [(String, ParsedFeed?)] = []
-            for await r in group { out.append(r) }
-            return out
+            for await (url, parsed) in group {
+                guard let parsed else {
+                    failures += 1
+                    continue
+                }
+                if let feed = feedByURL[url] {
+                    apply(parsed, to: feed, in: context)
+                    try? context.save()
+                }
+            }
         }
-        var failures = 0
-        for (url, parsed) in results {
-            guard let parsed else { failures += 1; continue }
-            if let feed = feeds.first(where: { $0.feedURL == url }) { apply(parsed, to: feed, in: context) }
-        }
-        try? context.save()
         lastError = failures > 0 ? "\(failures) feed(s) failed to refresh." : nil
+    }
+
+    func bootstrapFeedsIfNeeded(settings: AppSettings, in context: ModelContext) async {
+        let deadURL = "http://www.aaronsw.com/2002/feeds/pgessays.rss"
+        if let deadFeed = try? fetchFeed(url: deadURL, in: context), deadFeed.articles.isEmpty {
+            context.delete(deadFeed)
+            let replacementURL = "https://daringfireball.net/feeds/main"
+            if (try? fetchFeed(url: replacementURL, in: context)) ?? nil == nil {
+                context.insert(Feed(
+                    feedURL: replacementURL,
+                    title: "Daring Fireball",
+                    folderName: "Tech",
+                    preferExtensionBrowser: settings.defaultOpenInExtensionBrowser
+                ))
+            }
+            try? context.save()
+        }
+
+        let feeds = (try? context.fetch(FetchDescriptor<Feed>())) ?? []
+        if feeds.isEmpty && !settings.hasSeededStarterFeeds {
+            settings.hasSeededStarterFeeds = true
+            await addStarterFeeds(preferExtensionBrowser: settings.defaultOpenInExtensionBrowser, in: context)
+        } else if !feeds.isEmpty {
+            await refreshAll(feeds: feeds, in: context)
+        }
     }
 
     private func apply(_ parsed: ParsedFeed, to feed: Feed, in context: ModelContext) {

@@ -37,11 +37,17 @@ struct ChromaRSSApp: App {
                 } else {
                     RootTabView()
                         .frame(minWidth: 960, minHeight: 680)
-                        .task { await extensionManager.bootstrap() }
+                        .task {
+                            await extensionManager.bootstrap()
+                            await syncService.bootstrapFeedsIfNeeded(settings: settings, in: container.mainContext)
+                        }
                 }
                 #else
                 RootTabView()
-                    .task { await extensionManager.bootstrap() }
+                    .task {
+                        await extensionManager.bootstrap()
+                        await syncService.bootstrapFeedsIfNeeded(settings: settings, in: container.mainContext)
+                    }
                 #endif
             }
             .environment(settings)

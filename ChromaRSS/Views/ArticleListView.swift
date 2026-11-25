@@ -40,10 +40,8 @@ struct ArticleListView: View {
         self.showEmptyStarterButton = showEmptyStarterButton
         let sort = [SortDescriptor(\Article.sortDate, order: .reverse)]
         switch scope {
-        case .all, .today, .folder:
+        case .all, .today, .folder, .unread:
             _articles = Query(sort: sort)
-        case .unread:
-            _articles = Query(filter: #Predicate<Article> { !$0.isRead }, sort: sort)
         case .starred:
             _articles = Query(filter: #Predicate<Article> { $0.isStarred }, sort: sort)
         case .feed(let url):
@@ -53,6 +51,9 @@ struct ArticleListView: View {
 
     private var scopedArticles: [Article] {
         switch scope {
+        case .unread:
+            let activeKey = selectedArticle?.wrappedValue?.uniqueKey
+            return articles.filter { !$0.isRead || $0.uniqueKey == activeKey }
         case .today:
             return articles.filter { Calendar.current.isDateInToday($0.sortDate) }
         case .folder(let name):
@@ -63,10 +64,11 @@ struct ArticleListView: View {
     }
 
     private var visible: [Article] {
-        scopedArticles.filter { article in
+        let activeKey = selectedArticle?.wrappedValue?.uniqueKey
+        return scopedArticles.filter { article in
             switch filter {
             case .all: true
-            case .unread: !article.isRead
+            case .unread: !article.isRead || article.uniqueKey == activeKey
             case .saved: article.isStarred
             case .today: Calendar.current.isDateInToday(article.sortDate)
             }
@@ -119,23 +121,38 @@ struct ArticleListView: View {
                 } else {
                     LazyVStack(spacing: settings.streamLayout == .compact ? ChromaSpacing.xs : ChromaSpacing.s) {
                         ForEach(visible) { article in
-                            Button { open(article) } label: { rowView(for: article) }
-                                .buttonStyle(.plain)
-                                .contextMenu { articleActions(article) }
-                                .swipeActions(edge: .leading) {
-                                    Button { article.isStarred.toggle() } label: {
-                                        Label(article.isStarred ? "Unsave" : "Save",
-                                              systemImage: article.isStarred ? "bookmark.slash" : "bookmark")
+                            Group {
+                                if settings.streamLayout == .cards {
+                                    HeroCardArticleView(
+                                        article: article,
+                                        isSelected: selectedArticle?.wrappedValue?.uniqueKey == article.uniqueKey,
+                                        onOpen: { open(article) },
+                                        onToggleRead: { article.isRead.toggle() },
+                                        onToggleStar: { article.isStarred.toggle() }
+                                    )
+                                } else {
+                                    Button { open(article) } label: {
+                                        rowView(for: article)
+                                            .contentShape(Rectangle())
                                     }
-                                    .tint(ChromaPalette.starAmber)
+                                    .buttonStyle(.plain)
                                 }
-                                .swipeActions(edge: .trailing) {
-                                    Button { article.isRead.toggle() } label: {
-                                        Label(article.isRead ? "Unread" : "Read",
-                                              systemImage: article.isRead ? "circle" : "checkmark")
-                                    }
-                                    .tint(ChromaPalette.unreadIndigo)
+                            }
+                            .contextMenu { articleActions(article) }
+                            .swipeActions(edge: .leading) {
+                                Button { article.isStarred.toggle() } label: {
+                                    Label(article.isStarred ? "Unsave" : "Save",
+                                          systemImage: article.isStarred ? "bookmark.slash" : "bookmark")
                                 }
+                                .tint(ChromaPalette.starAmber)
+                            }
+                            .swipeActions(edge: .trailing) {
+                                Button { article.isRead.toggle() } label: {
+                                    Label(article.isRead ? "Unread" : "Read",
+                                          systemImage: article.isRead ? "circle" : "checkmark")
+                                }
+                                .tint(ChromaPalette.unreadIndigo)
+                            }
                         }
                     }
                     .padding(.horizontal, ChromaSpacing.m)
@@ -210,7 +227,7 @@ struct ArticleListView: View {
             Label(article.isStarred ? "Remove Bookmark" : "Save for Later",
                   systemImage: article.isStarred ? "bookmark.slash" : "bookmark")
         }
-        if let url = URL(string: article.link) {
+        if let url = article.resolvedURL {
             Button {
                 browserTarget = BrowserTarget(url: url, title: article.title, article: article)
             } label: {
@@ -221,7 +238,16 @@ struct ArticleListView: View {
 
     @ViewBuilder
     private var emptyView: some View {
-        if !search.isEmpty {
+        if sync.isRefreshing {
+            ContentUnavailableView {
+                VStack(spacing: ChromaSpacing.s) {
+                    ProgressView()
+                    Text("Loading articles…")
+                }
+            } description: {
+                Text("Fetching your subscribed feeds.")
+            }
+        } else if !search.isEmpty {
             ContentUnavailableView.search
         } else if showEmptyStarterButton && scopedArticles.isEmpty {
             ContentUnavailableView {
@@ -241,6 +267,17 @@ struct ArticleListView: View {
                     .buttonStyle(.bordered)
                 }
             }
+        } else if case .feed = scope {
+            ContentUnavailableView {
+                Label("No Articles Yet", systemImage: "tray")
+            } description: {
+                Text("This feed doesn't have any loaded articles yet.")
+            } actions: {
+                Button("Refresh Feed") {
+                    Task { await refresh() }
+                }
+                .buttonStyle(.borderedProminent)
+            }
         } else {
             ContentUnavailableView("No Matching Articles", systemImage: "tray", description: Text("Try switching filters or pulling down to refresh."))
         }
@@ -253,7 +290,7 @@ struct ArticleListView: View {
             return
         }
         let useExtension = article.feed?.preferExtensionBrowser ?? settings.defaultOpenInExtensionBrowser
-        if useExtension, let url = URL(string: article.link) {
+        if useExtension, let url = article.resolvedURL {
             browserTarget = BrowserTarget(url: url, title: article.title, article: article)
         } else {
             readerArticle = article

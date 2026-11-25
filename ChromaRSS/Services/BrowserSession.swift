@@ -41,6 +41,7 @@ final class BrowserTabAdapter: NSObject, WKWebExtensionTab, WKNavigationDelegate
     private(set) var canGoBack = false
     private(set) var canGoForward = false
     private(set) var isExtensionPage: Bool
+    private(set) var loadError: String?
 
     @ObservationIgnored private var observations: [NSKeyValueObservation] = []
 
@@ -96,6 +97,7 @@ final class BrowserTabAdapter: NSObject, WKWebExtensionTab, WKNavigationDelegate
     // MARK: Loading
 
     func load(_ url: URL) {
+        loadError = nil
         let wantsExtension = url.scheme == "webkit-extension"
         if wantsExtension != isExtensionPage, let session {
             // Extension pages need the extension's own web view configuration (and vice versa).
@@ -133,6 +135,26 @@ final class BrowserTabAdapter: NSObject, WKWebExtensionTab, WKNavigationDelegate
             return .cancel
         }
         return .allow
+    }
+
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        loadError = nil
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        loadError = nil
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: any Error) {
+        let nsError = error as NSError
+        guard !(nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorCancelled) else { return }
+        loadError = error.localizedDescription
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: any Error) {
+        let nsError = error as NSError
+        guard !(nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorCancelled) else { return }
+        loadError = error.localizedDescription
     }
 
     // MARK: WKUIDelegate
@@ -199,6 +221,7 @@ final class BrowserSession {
     private(set) var tabs: [BrowserTabAdapter] = []
     private(set) var activeTabID: UUID?
     var shouldDismiss = false
+    @ObservationIgnored private var isEnded = false
 
     var activeTab: BrowserTabAdapter? { tabs.first { $0.id == activeTabID } }
 
@@ -208,6 +231,7 @@ final class BrowserSession {
     }
 
     func start(initialURL: URL) {
+        isEnded = false
         manager.activeSession = self
         manager.controller.didOpenWindow(window)
         manager.controller.didFocusWindow(window)
@@ -215,11 +239,21 @@ final class BrowserSession {
     }
 
     func end() {
+        guard !isEnded else { return }
+        isEnded = true
         for tab in tabs { manager.controller.didCloseTab(tab, windowIsClosing: true) }
         manager.controller.didCloseWindow(window)
         tabs.removeAll()
         activeTabID = nil
         if manager.activeSession === self { manager.activeSession = nil }
+    }
+
+    func navigateActiveTab(to url: URL) {
+        if let activeTab {
+            activeTab.load(url)
+        } else {
+            openTab(url: url, activate: true)
+        }
     }
 
     @discardableResult
@@ -264,8 +298,10 @@ final class BrowserSession {
         cfg.websiteDataStore = .default()
         #if os(iOS)
         cfg.allowsInlineMediaPlayback = true
-        #endif
         cfg.applicationNameForUserAgent = "Version/18.4 Mobile/15E148 Safari/604.1"
+        #else
+        cfg.applicationNameForUserAgent = "Version/18.4 Safari/605.1.15"
+        #endif
         return cfg
     }
 }

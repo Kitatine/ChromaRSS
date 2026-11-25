@@ -64,4 +64,14 @@ final class Article {
         self.isRead = false
         self.isStarred = false
     }
+
+    var resolvedURL: URL? {
+        let trimmed = link.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        if let direct = URL(string: trimmed) { return direct }
+        if let encoded = trimmed.addingPercentEncoding(withAllowedCharacters: .urlFragmentAllowed) {
+            return URL(string: encoded)
+        }
+        return nil
+    }
 }

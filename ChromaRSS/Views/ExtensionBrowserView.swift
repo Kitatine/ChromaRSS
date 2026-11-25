@@ -12,6 +12,7 @@ struct ExtensionBrowserView: View {
     @State private var session: BrowserSession?
     @State private var showTabs = false
     @State private var showSummary = false
+    @State private var showReaderMode = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -29,6 +30,10 @@ struct ExtensionBrowserView: View {
             session = s
             s.start(initialURL: target.url)
         }
+        .onChange(of: target.url) { _, newURL in
+            showReaderMode = false
+            session?.navigateActiveTab(to: newURL)
+        }
         .onDisappear { session?.end() }
         .onChange(of: session?.shouldDismiss ?? false) { _, newValue in
             if newValue && !isEmbedded { dismiss() }
@@ -40,11 +45,83 @@ struct ExtensionBrowserView: View {
         let tab = session.activeTab
         topBar(session, tab)
         Group {
-            if let tab { WebViewContainer(webView: tab.webView) } else { Color.clear }
+            if showReaderMode, let article = target.article {
+                ArticleReaderView(article: article, showLaunchBrowserButton: false)
+            } else {
+                ZStack {
+                    if let tab {
+                        WebViewContainer(webView: tab.webView)
+                    } else {
+                        Color.clear
+                    }
+                    if let err = tab?.loadError, !(tab?.isLoading ?? false) {
+                        loadErrorOverlay(err, tab: tab)
+                    }
+                }
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         Divider()
         bottomBar(session, tab)
+    }
+
+    private func loadErrorOverlay(_ errorText: String, tab: BrowserTabAdapter?) -> some View {
+        VStack(spacing: ChromaSpacing.m) {
+            Image(systemName: "exclamationmark.icloud.fill")
+                .font(.system(size: 36))
+                .foregroundStyle(ChromaPalette.coral)
+
+            VStack(spacing: ChromaSpacing.xxs) {
+                Text("Page Couldn't Load")
+                    .font(.headline)
+                Text(errorText)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+
+            if let article = target.article {
+                let excerpt = HTMLTextExtractor.plainText(from: article.contentHTML ?? article.summary ?? "", maxLength: 260)
+                if !excerpt.isEmpty {
+                    Text(excerpt)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(ChromaSpacing.s)
+                        .background(theme.elevatedColor, in: RoundedRectangle(cornerRadius: ChromaRadius.m))
+                }
+            }
+
+            HStack(spacing: ChromaSpacing.s) {
+                if target.article != nil {
+                    Button {
+                        showReaderMode = true
+                    } label: {
+                        Label("Switch to Reader View", systemImage: "doc.text.fill")
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                Button {
+                    tab?.load(target.url)
+                } label: {
+                    Label("Retry", systemImage: "arrow.clockwise")
+                }
+                .buttonStyle(.bordered)
+                Button {
+                    PlatformSupport.openExternalURL(target.url)
+                } label: {
+                    Label("Open in Browser", systemImage: "safari")
+                }
+                .buttonStyle(.bordered)
+            }
+        }
+        .padding(ChromaSpacing.l)
+        .frame(maxWidth: 460)
+        .chromaCardSurface(theme: theme, cornerRadius: ChromaRadius.xl)
+        .padding(ChromaSpacing.l)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(theme.canvasColor)
     }
 
     private func topBar(_ session: BrowserSession, _ tab: BrowserTabAdapter?) -> some View {
@@ -91,6 +168,24 @@ struct ExtensionBrowserView: View {
                 .padding(.vertical, 6)
                 .background(theme.elevatedColor, in: Capsule())
                 .overlay(Capsule().strokeBorder(theme.borderColor, lineWidth: 1))
+
+                if target.article != nil {
+                    Button {
+                        showReaderMode.toggle()
+                    } label: {
+                        Label(
+                            showReaderMode ? "Web + Plugins" : "Reader",
+                            systemImage: showReaderMode ? "puzzlepiece.extension.fill" : "doc.text.fill"
+                        )
+                        .font(.caption.weight(.semibold))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 7)
+                        .background(showReaderMode ? ChromaPalette.unreadIndigo : theme.elevatedColor, in: Capsule())
+                        .foregroundStyle(showReaderMode ? .white : .primary)
+                        .fixedSize()
+                    }
+                    .buttonStyle(.plain)
+                }
 
                 Button { showTabs = true } label: {
                     HStack(spacing: 4) {

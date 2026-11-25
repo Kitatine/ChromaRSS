@@ -105,7 +105,7 @@ public enum FeedDiscovery {
 
     private static func performFetch(url: URL, userAgent: String, session: URLSession) async throws -> (Data, URLResponse) {
         var req = URLRequest(url: url)
-        req.timeoutInterval = 25
+        req.timeoutInterval = 12
         req.setValue(userAgent, forHTTPHeaderField: "User-Agent")
         req.setValue("application/rss+xml, application/atom+xml, application/feed+json, application/xml, text/xml, text/html;q=0.8, */*;q=0.5", forHTTPHeaderField: "Accept")
         return try await session.data(for: req)

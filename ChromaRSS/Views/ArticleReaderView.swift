@@ -3,6 +3,7 @@ import ChromaRSSCore
 
 struct ArticleReaderView: View {
     let article: Article
+    var showLaunchBrowserButton: Bool = true
     @Environment(\.chromaTheme) private var theme
     @Environment(\.chromaHeadlineDesign) private var headlineDesign
     @State private var browserTarget: BrowserTarget?
@@ -51,7 +52,7 @@ struct ArticleReaderView: View {
                     .fontDesign(headlineDesign.fontDesign)
                     .lineSpacing(7)
 
-                if let url = URL(string: article.link) {
+                if showLaunchBrowserButton, let url = article.resolvedURL {
                     Button {
                         browserTarget = BrowserTarget(url: url, title: article.title, article: article)
                     } label: {
@@ -79,7 +80,7 @@ struct ArticleReaderView: View {
                     article.isStarred.toggle()
                 }
                 .labelStyle(.iconOnly)
-                if let url = URL(string: article.link) { ShareLink(item: url) }
+                if let url = article.resolvedURL { ShareLink(item: url) }
             }
         }
         .chromaBrowserPresentation(item: $browserTarget) { ExtensionBrowserView(target: $0) }

@@ -54,8 +54,17 @@ struct InoreaderWorkspaceView: View {
             ExtensionOptionsSheet(extensionContext: request.context)
         }
         .onAppear {
-            if selectedArticle == nil, let initialSelectedArticle {
+            if selectedArticle == nil {
                 selectedArticle = initialSelectedArticle
+                    ?? allArticles.first(where: { !$0.isRead })
+                    ?? allArticles.first
+            }
+        }
+        .onChange(of: allArticles.count) { _, _ in
+            if selectedArticle == nil {
+                selectedArticle = initialSelectedArticle
+                    ?? allArticles.first(where: { !$0.isRead })
+                    ?? allArticles.first
             }
         }
     }
@@ -89,7 +98,37 @@ struct InoreaderWorkspaceView: View {
                     ForEach(groups.keys.sorted(), id: \.self) { folder in
                         let folderFeeds = groups[folder] ?? []
                         let folderUnread = folderFeeds.reduce(0) { $0 + $1.unreadCount }
-                        DisclosureGroup(isExpanded: folderExpandedBinding(for: folder)) {
+                        let isCollapsed = collapsedFolders.contains(folder)
+
+                        HStack(spacing: ChromaSpacing.xs) {
+                            Button {
+                                if isCollapsed { collapsedFolders.remove(folder) }
+                                else { collapsedFolders.insert(folder) }
+                            } label: {
+                                Image(systemName: isCollapsed ? "chevron.right" : "chevron.down")
+                                    .font(.caption2.bold())
+                                    .foregroundStyle(.secondary)
+                                    .frame(width: 14, height: 14)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.borderless)
+
+                            Image(systemName: "folder.fill")
+                                .foregroundStyle(ChromaPalette.unreadIndigo)
+                            Text(folder)
+                                .fontWeight(.medium)
+                                .lineLimit(1)
+                            Spacer()
+                            if folderUnread > 0 {
+                                Text("\(folderUnread)")
+                                    .font(.caption.bold())
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .contentShape(Rectangle())
+                        .tag(WorkspaceSidebarItem.folder(folder))
+
+                        if !isCollapsed {
                             ForEach(folderFeeds) { feed in
                                 HStack(spacing: ChromaSpacing.xs) {
                                     FeedAvatarView(title: feed.title, siteURL: feed.siteURL, feedURL: feed.feedURL, iconURL: feed.iconURL, size: 20)
@@ -101,20 +140,31 @@ struct InoreaderWorkspaceView: View {
                                             .foregroundStyle(.secondary)
                                     }
                                 }
+                                .padding(.leading, 18)
+                                .contentShape(Rectangle())
                                 .tag(WorkspaceSidebarItem.feed(feed.feedURL))
-                            }
-                        } label: {
-                            HStack {
-                                Label(folder, systemImage: "folder.fill")
-                                Spacer()
-                                if folderUnread > 0 {
-                                    Text("\(folderUnread)")
-                                        .font(.caption.bold())
-                                        .foregroundStyle(.secondary)
+                                .contextMenu {
+                                    Button {
+                                        Task { try? await sync.refresh(feed: feed, in: modelContext) }
+                                    } label: {
+                                        Label("Refresh Feed", systemImage: "arrow.clockwise")
+                                    }
+                                    Button {
+                                        feed.preferExtensionBrowser.toggle()
+                                    } label: {
+                                        Label(feed.preferExtensionBrowser ? "Default to Reader View" : "Default to Extension Browser",
+                                              systemImage: feed.preferExtensionBrowser ? "doc.text" : "puzzlepiece.extension")
+                                    }
+                                    Divider()
+                                    Button(role: .destructive) {
+                                        if selection == .feed(feed.feedURL) { selection = .all }
+                                        modelContext.delete(feed)
+                                    } label: {
+                                        Label("Unsubscribe", systemImage: "trash")
+                                    }
                                 }
                             }
                         }
-                        .tag(WorkspaceSidebarItem.folder(folder))
                     }
                 }
             } header: {
@@ -142,6 +192,7 @@ struct InoreaderWorkspaceView: View {
                 .tag(WorkspaceSidebarItem.extensions)
 
                 Label("Settings", systemImage: "gearshape.fill")
+                    .contentShape(Rectangle())
                     .tag(WorkspaceSidebarItem.settings)
             }
         }
@@ -170,19 +221,24 @@ struct InoreaderWorkspaceView: View {
             .background(.bar)
         }
         .onChange(of: selection) { _, newValue in
-            if case .extensions = newValue { selectedArticle = nil }
-            if case .settings = newValue { selectedArticle = nil }
-        }
-    }
-
-    private func folderExpandedBinding(for folder: String) -> Binding<Bool> {
-        Binding(
-            get: { !collapsedFolders.contains(folder) },
-            set: { expanded in
-                if expanded { collapsedFolders.remove(folder) }
-                else { collapsedFolders.insert(folder) }
+            switch newValue {
+            case .extensions, .settings:
+                selectedArticle = nil
+            case .feed(let url):
+                if selectedArticle?.feedURL != url {
+                    selectedArticle = allArticles.first(where: { $0.feedURL == url && !$0.isRead })
+                        ?? allArticles.first(where: { $0.feedURL == url })
+                }
+            case .folder(let name):
+                let currentFolder = selectedArticle?.feed?.folderName?.nilIfEmpty ?? "Subscriptions"
+                if selectedArticle == nil || currentFolder != name {
+                    selectedArticle = allArticles.first(where: { ($0.feed?.folderName?.nilIfEmpty ?? "Subscriptions") == name && !$0.isRead })
+                        ?? allArticles.first(where: { ($0.feed?.folderName?.nilIfEmpty ?? "Subscriptions") == name })
+                }
+            default:
+                break
             }
-        )
+        }
     }
 
     private func sidebarBadgeRow(title: String, systemImage: String, tint: Color, count: Int) -> some View {
@@ -203,29 +259,33 @@ struct InoreaderWorkspaceView: View {
                     .background(theme.elevatedColor, in: Capsule())
             }
         }
+        .contentShape(Rectangle())
     }
 
     @ViewBuilder
     private var middleColumn: some View {
-        switch selection ?? .unread {
-        case .unread:
-            ArticleListView(scope: .unread, title: "Unread", selectedArticle: $selectedArticle, showEmptyStarterButton: true)
-        case .today:
-            ArticleListView(scope: .today, title: "Today", selectedArticle: $selectedArticle, showEmptyStarterButton: true)
-        case .all:
-            ArticleListView(scope: .all, title: "All Articles", selectedArticle: $selectedArticle, showEmptyStarterButton: true)
-        case .saved:
-            ArticleListView(scope: .starred, title: "Saved", selectedArticle: $selectedArticle)
-        case .folder(let name):
-            ArticleListView(scope: .folder(name), title: name, selectedArticle: $selectedArticle)
-        case .feed(let url):
-            let feedTitle = feeds.first(where: { $0.feedURL == url })?.title ?? "Feed"
-            ArticleListView(scope: .feed(url), title: feedTitle, selectedArticle: $selectedArticle)
-        case .extensions:
-            ExtensionManagerView()
-        case .settings:
-            SettingsView()
+        Group {
+            switch selection ?? .unread {
+            case .unread:
+                ArticleListView(scope: .unread, title: "Unread", selectedArticle: $selectedArticle, showEmptyStarterButton: true)
+            case .today:
+                ArticleListView(scope: .today, title: "Today", selectedArticle: $selectedArticle, showEmptyStarterButton: true)
+            case .all:
+                ArticleListView(scope: .all, title: "All Articles", selectedArticle: $selectedArticle, showEmptyStarterButton: true)
+            case .saved:
+                ArticleListView(scope: .starred, title: "Saved", selectedArticle: $selectedArticle)
+            case .folder(let name):
+                ArticleListView(scope: .folder(name), title: name, selectedArticle: $selectedArticle)
+            case .feed(let url):
+                let feedTitle = feeds.first(where: { $0.feedURL == url })?.title ?? "Feed"
+                ArticleListView(scope: .feed(url), title: feedTitle, selectedArticle: $selectedArticle)
+            case .extensions:
+                ExtensionManagerView()
+            case .settings:
+                SettingsView()
+            }
         }
+        .id(selection)
     }
 
     @ViewBuilder
@@ -239,9 +299,8 @@ struct InoreaderWorkspaceView: View {
             .background(theme.canvasColor)
         } else if let article = selectedArticle {
             let useExtension = article.feed?.preferExtensionBrowser ?? settings.defaultOpenInExtensionBrowser
-            if useExtension, let url = URL(string: article.link) {
+            if useExtension, let url = article.resolvedURL {
                 ExtensionBrowserView(target: BrowserTarget(url: url, title: article.title, article: article), isEmbedded: true)
-                    .id(article.uniqueKey)
             } else {
                 ArticleReaderView(article: article)
                     .id(article.uniqueKey)
